@@ -31,8 +31,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 
 #------ Declare the correct global tag ------#
 
-#Global Tag for Run2015D
-process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2'
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable
+process.GlobalTag.globaltag = '94X_dataRun2_v11'
 
 #------ If we add any inputs beyond standard miniAOD event content, import them here ------#
 
