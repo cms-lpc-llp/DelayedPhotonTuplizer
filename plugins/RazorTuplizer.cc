@@ -314,9 +314,9 @@ void RazorTuplizer::setBranches(){
   enableEventInfoBranches();
   enablePVAllBranches();
   enablePileUpBranches();
-  enableMuonBranches();
+  // enableMuonBranches();
   enableElectronBranches();
-  enableTauBranches();
+  // enableTauBranches();
   //enableIsoPFCandidateBranches();
   enablePhotonBranches();
   enableJetBranches();
