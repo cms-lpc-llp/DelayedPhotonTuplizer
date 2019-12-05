@@ -556,31 +556,31 @@ void RazorTuplizer::enablePhotonBranches(){
 
 void RazorTuplizer::enableEcalRechitBranches(){
 
-  ecalRechit_Eta = new std::vector<float>; ecalRechit_Eta->clear();
-  ecalRechit_Phi = new std::vector<float>; ecalRechit_Phi->clear();
-  ecalRechit_X = new std::vector<float>; ecalRechit_X->clear();
-  ecalRechit_Y = new std::vector<float>; ecalRechit_Y->clear();
-  ecalRechit_Z = new std::vector<float>; ecalRechit_Z->clear();
-  ecalRechit_E = new std::vector<float>; ecalRechit_E->clear();
-  ecalRechit_T = new std::vector<float>; ecalRechit_T->clear();
+  ecalRechit_Eta = new std::vector<Float16_t>; ecalRechit_Eta->clear();
+  ecalRechit_Phi = new std::vector<Float16_t>; ecalRechit_Phi->clear();
+  ecalRechit_X = new std::vector<Float16_t>; ecalRechit_X->clear();
+  ecalRechit_Y = new std::vector<Float16_t>; ecalRechit_Y->clear();
+  ecalRechit_Z = new std::vector<Float16_t>; ecalRechit_Z->clear();
+  ecalRechit_E = new std::vector<Float16_t>; ecalRechit_E->clear();
+  ecalRechit_T = new std::vector<Float16_t>; ecalRechit_T->clear();
   ecalRechit_ID = new std::vector<uint>; ecalRechit_ID->clear();
   ecalRechit_FlagOOT = new std::vector<bool>; ecalRechit_FlagOOT->clear();
   ecalRechit_GainSwitch1 = new std::vector<bool>; ecalRechit_GainSwitch1->clear();
   ecalRechit_GainSwitch6 = new std::vector<bool>; ecalRechit_GainSwitch6->clear();
-  ecalRechit_transpCorr = new std::vector<float>; ecalRechit_transpCorr->clear();
+  ecalRechit_transpCorr = new std::vector<Float16_t>; ecalRechit_transpCorr->clear();
 
-  RazorEvents->Branch("ecalRechit_Eta", "std::vector<float>",&ecalRechit_Eta);
-  RazorEvents->Branch("ecalRechit_Phi", "std::vector<float>",&ecalRechit_Phi);
-  RazorEvents->Branch("ecalRechit_X", "std::vector<float>",&ecalRechit_X);
-  RazorEvents->Branch("ecalRechit_Y", "std::vector<float>",&ecalRechit_Y);
-  RazorEvents->Branch("ecalRechit_Z", "std::vector<float>",&ecalRechit_Z);
-  RazorEvents->Branch("ecalRechit_E", "std::vector<float>",&ecalRechit_E);
-  RazorEvents->Branch("ecalRechit_T", "std::vector<float>",&ecalRechit_T);
+  RazorEvents->Branch("ecalRechit_Eta", "std::vector<Float16_t>",&ecalRechit_Eta);
+  RazorEvents->Branch("ecalRechit_Phi", "std::vector<Float16_t>",&ecalRechit_Phi);
+  RazorEvents->Branch("ecalRechit_X", "std::vector<Float16_t>",&ecalRechit_X);
+  RazorEvents->Branch("ecalRechit_Y", "std::vector<Float16_t>",&ecalRechit_Y);
+  RazorEvents->Branch("ecalRechit_Z", "std::vector<Float16_t>",&ecalRechit_Z);
+  RazorEvents->Branch("ecalRechit_E", "std::vector<Float16_t>",&ecalRechit_E);
+  RazorEvents->Branch("ecalRechit_T", "std::vector<Float16_t>",&ecalRechit_T);
   RazorEvents->Branch("ecalRechit_ID", "std::vector<uint>",&ecalRechit_ID);
   RazorEvents->Branch("ecalRechit_FlagOOT", "std::vector<bool>",&ecalRechit_FlagOOT);
   RazorEvents->Branch("ecalRechit_GainSwitch1", "std::vector<bool>",&ecalRechit_GainSwitch1);
   RazorEvents->Branch("ecalRechit_GainSwitch6", "std::vector<bool>",&ecalRechit_GainSwitch6);
-  RazorEvents->Branch("ecalRechit_transpCorr", "std::vector<float>",&ecalRechit_transpCorr);
+  RazorEvents->Branch("ecalRechit_transpCorr", "std::vector<Float16_t>",&ecalRechit_transpCorr);
 
 }
 
