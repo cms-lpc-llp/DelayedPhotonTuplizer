@@ -541,6 +541,11 @@ protected:
   bool  pho_seedRecHitSwitchToGain1[OBJECTARRAYSIZE];
   bool  pho_anyRecHitSwitchToGain6[OBJECTARRAYSIZE];
   bool  pho_anyRecHitSwitchToGain1[OBJECTARRAYSIZE];
+  bool pho_cutBasedID_loose[OBJECTARRAYSIZE];
+  bool pho_cutBasedID_medium[OBJECTARRAYSIZE];
+  bool pho_cutBasedID_tight[OBJECTARRAYSIZE];
+  float pho_mvaValue[OBJECTARRAYSIZE];
+  int pho_mvaCategory[OBJECTARRAYSIZE];
   vector<vector<uint> > pho_EcalRechitID;
   vector<vector<uint> > *pho_EcalRechitIndex;
   vector<uint>  pho_SeedRechitID;

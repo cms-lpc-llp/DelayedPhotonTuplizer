@@ -3,7 +3,7 @@
 /*
   Description: Base class for miniAOD analysis with CRAB
 */
-//         Author:  Caltech razor team
+//         Author:  Caltech team
 //         Created:  Thu, 17 Jul 2014 15:00:06 GMT
 
 #include "RazorTuplizer.h"
@@ -534,6 +534,11 @@ void RazorTuplizer::enablePhotonBranches(){
   RazorEvents->Branch("pho_seedRecHitSwitchToGain1", pho_seedRecHitSwitchToGain1, "pho_seedRecHitSwitchToGain1[nPhotons]/F");
   RazorEvents->Branch("pho_anyRecHitSwitchToGain6", pho_anyRecHitSwitchToGain6, "pho_anyRecHitSwitchToGain6[nPhotons]/F");
   RazorEvents->Branch("pho_anyRecHitSwitchToGain1", pho_anyRecHitSwitchToGain1, "pho_anyRecHitSwitchToGain1[nPhotons]/F");
+  RazorEvents->Branch("pho_cutBasedID_loose", pho_cutBasedID_loose, "pho_cutBasedID_loose[nPhotons]/O");
+  RazorEvents->Branch("pho_cutBasedID_medium", pho_cutBasedID_medium, "pho_cutBasedID_medium[nPhotons]/O");
+  RazorEvents->Branch("pho_cutBasedID_tight", pho_cutBasedID_tight, "pho_cutBasedID_tight[nPhotons]/O");
+  RazorEvents->Branch("pho_mvaValue", pho_mvaValue, "pho_mvaValue[nPhotons]/F");
+  RazorEvents->Branch("pho_mvaCategory", pho_mvaCategory, "pho_mvaValueCategory[nPhotons]/I");
   if (enableEcalRechits_) {
     pho_EcalRechitIndex = new std::vector<std::vector<uint> >; pho_EcalRechitIndex->clear();
     RazorEvents->Branch("pho_EcalRechitIndex", "std::vector<std::vector<uint> >",&pho_EcalRechitIndex);
@@ -865,7 +870,8 @@ void RazorTuplizer::resetBranches(){
       pvAllSumPy[i] = 0.;
     }
     
-    for(int i = 0; i < OBJECTARRAYSIZE; i++){      
+    for(int i = 0; i < OBJECTARRAYSIZE; i++)
+    {      
         //PU
         BunchXing[i] = -99;
         nPU[i] = -99;
@@ -890,14 +896,14 @@ void RazorTuplizer::resetBranches(){
         muon_chargedIso[i] = -99.0;
         muon_photonIso[i] = -99.0;
         muon_neutralHadIso[i] = -99.0;
-	muon_ptrel[i] = -99.0;
-	muon_chargedMiniIso[i] = -99.0;
-	muon_photonAndNeutralHadronMiniIso[i] = -99.0;
-	muon_chargedPileupMiniIso[i] = -99.0;
-	muon_activityMiniIsoAnnulus[i] = -99.0;
-	muon_passSingleMuTagFilter[i] = false;
-	for (int q=0;q<MAX_MuonHLTFilters;q++) muon_passHLTFilter[i][q] = false;
-	muon_validFractionTrackerHits[i] = -99.0;
+        muon_ptrel[i] = -99.0;
+        muon_chargedMiniIso[i] = -99.0;
+        muon_photonAndNeutralHadronMiniIso[i] = -99.0;
+        muon_chargedPileupMiniIso[i] = -99.0;
+        muon_activityMiniIsoAnnulus[i] = -99.0;
+        muon_passSingleMuTagFilter[i] = false;
+        for (int q=0;q<MAX_MuonHLTFilters;q++) muon_passHLTFilter[i][q] = false;
+        muon_validFractionTrackerHits[i] = -99.0;
         muon_isGlobal[i] = false;
         muon_normChi2[i] = -99.0;
         muon_chi2LocalPosition[i] = -99.0;
@@ -921,13 +927,13 @@ void RazorTuplizer::resetBranches(){
         ele_HoverE[i] = -99;
         ele_d0[i] = -99;
         ele_dZ[i] = -99;
-	ele_ip3d[i] = -99;
-	ele_ip3dSignificance[i] = -99;
-	ele_pileupIso[i] = -99.0;
+        ele_ip3d[i] = -99;
+        ele_ip3dSignificance[i] = -99;
+        ele_pileupIso[i] = -99.0;
         ele_chargedIso[i] = -99.0;
         ele_photonIso[i] = -99.0;
         ele_neutralHadIso[i] = -99.0;
-	ele_MissHits[i] = -99;
+        ele_MissHits[i] = -99;
         ele_PassConvVeto[i] = false;
         ele_OneOverEminusOneOverP[i] = -99.0;
         ele_IDMVAGeneralPurpose[i] = -99.0;
@@ -936,17 +942,17 @@ void RazorTuplizer::resetBranches(){
         ele_IDMVACategoryHZZ[i] = -1;
         ele_RegressionE[i] = -99.0;
         ele_CombineP4[i] = -99.0;
-	ele_ptrel[i] = -99.0;
-	ele_chargedMiniIso[i] = -99.0;
-	ele_photonAndNeutralHadronMiniIso[i] = -99.0;
-	ele_chargedPileupMiniIso[i] = -99.0;
-	ele_activityMiniIsoAnnulus[i] = -99.0;
-	ele_passSingleEleTagFilter[i] = false;
-	ele_passTPOneTagFilter[i] = false;
-	ele_passTPTwoTagFilter[i] = false;
-	ele_passTPOneProbeFilter[i] = false;
-	ele_passTPTwoProbeFilter[i] = false;
-	for (int q=0;q<MAX_ElectronHLTFilters;q++) ele_passHLTFilter[i][q] = false;
+        ele_ptrel[i] = -99.0;
+        ele_chargedMiniIso[i] = -99.0;
+        ele_photonAndNeutralHadronMiniIso[i] = -99.0;
+        ele_chargedPileupMiniIso[i] = -99.0;
+        ele_activityMiniIsoAnnulus[i] = -99.0;
+        ele_passSingleEleTagFilter[i] = false;
+        ele_passTPOneTagFilter[i] = false;
+        ele_passTPTwoTagFilter[i] = false;
+        ele_passTPOneProbeFilter[i] = false;
+        ele_passTPTwoProbeFilter[i] = false;
+        for (int q=0;q<MAX_ElectronHLTFilters;q++) ele_passHLTFilter[i][q] = false;
 
         //Tau
         tauE[i] = 0.0;
@@ -964,9 +970,9 @@ void RazorTuplizer::resetBranches(){
         tau_passMuVetoTight[i] = false;
         tau_ID[i] = 0;
         tau_combinedIsoDeltaBetaCorr3Hits[i] = -99.0;
-	tau_chargedIsoPtSum[i] = -99.0;
-	tau_neutralIsoPtSum[i] = -99.0;
-	tau_puCorrPtSum[i] = -99.0;
+        tau_chargedIsoPtSum[i] = -99.0;
+        tau_neutralIsoPtSum[i] = -99.0;
+        tau_puCorrPtSum[i] = -99.0;
         tau_eleVetoMVA[i] = -99.0;
         tau_eleVetoCategory[i] = -1;
         tau_muonVetoMVA[i] = -99.0;
@@ -997,47 +1003,52 @@ void RazorTuplizer::resetBranches(){
         pho_sminor[i] = -99.0;
         pho_smajor[i] = -99.0;
         pho_HoverE[i] = -99.0;
-	pho_sumChargedHadronPt[i] = -99.0;
-	pho_sumNeutralHadronEt[i] = -99.0;
+        pho_sumChargedHadronPt[i] = -99.0;
+        pho_sumNeutralHadronEt[i] = -99.0;
         pho_sumPhotonEt[i] = -99.0;
         pho_ecalPFClusterIso[i] = -99.0;
         pho_hcalPFClusterIso[i] = -99.0;
         pho_trkSumPtHollowConeDR03[i] = -99.0;
-	pho_sumWorstVertexChargedHadronPt[i] = -99.0;
-	pho_pfIsoChargedHadronIso[i] = -99.0;
-	pho_pfIsoChargedHadronIsoWrongVtx[i] = -99.0;
-	pho_pfIsoNeutralHadronIso[i] = -99.0;
-	pho_pfIsoPhotonIso[i] = -99.0;
-	pho_pfIsoModFrixione[i] = -99.0;
-	pho_pfIsoSumPUPt[i] = -99.0;       
-	pho_isConversion[i] = false;
+        pho_sumWorstVertexChargedHadronPt[i] = -99.0;
+        pho_pfIsoChargedHadronIso[i] = -99.0;
+        pho_pfIsoChargedHadronIsoWrongVtx[i] = -99.0;
+        pho_pfIsoNeutralHadronIso[i] = -99.0;
+        pho_pfIsoPhotonIso[i] = -99.0;
+        pho_pfIsoModFrixione[i] = -99.0;
+        pho_pfIsoSumPUPt[i] = -99.0;       
+        pho_isConversion[i] = false;
         pho_passEleVeto[i] = false;    
         pho_RegressionE[i] = -99.0;
         pho_RegressionEUncertainty[i] = -99.0;
-	pho_superClusterEnergy[i] = -99.0;
-	pho_superClusterRawEnergy[i] = -99.0;
+        pho_superClusterEnergy[i] = -99.0;
+        pho_superClusterRawEnergy[i] = -99.0;
         pho_superClusterEta[i]    = -99.0;
         pho_superClusterPhi[i]    = -99.0;
-	pho_superClusterX[i]      = -99.0;
-	pho_superClusterY[i]      = -99.0;
-	pho_superClusterZ[i]      = -99.0;
+        pho_superClusterX[i]      = -99.0;
+        pho_superClusterY[i]      = -99.0;
+        pho_superClusterZ[i]      = -99.0;
         pho_hasPixelSeed[i] = false;
-	for (int q=0;q<MAX_PhotonHLTFilters;q++) pho_passHLTFilter[i][q] = false;
+        for (int q=0;q<MAX_PhotonHLTFilters;q++) pho_passHLTFilter[i][q] = false;
         pho_convType[i] = -99;
         pho_convTrkZ[i] = -99.;
         pho_convTrkClusZ[i] = -99.;
-        
+
         for (int ipv=0; ipv < MAX_NPV; ++ipv) {
-          pho_sumChargedHadronPtAllVertices[i][ipv] = -99.0;
-          pho_vtxSumPx[i][ipv] = 0.;
-          pho_vtxSumPy[i][ipv] = 0.;
+            pho_sumChargedHadronPtAllVertices[i][ipv] = -99.0;
+            pho_vtxSumPx[i][ipv] = 0.;
+            pho_vtxSumPy[i][ipv] = 0.;
         }
-	pho_isStandardPhoton[i] = true;
-	pho_seedRecHitSwitchToGain6[i] = false;
-	pho_seedRecHitSwitchToGain1[i] = false;
-	pho_anyRecHitSwitchToGain6[i] = false;
-	pho_anyRecHitSwitchToGain1[i] = false;
-	
+        pho_isStandardPhoton[i] = true;
+        pho_seedRecHitSwitchToGain6[i] = false;
+        pho_seedRecHitSwitchToGain1[i] = false;
+        pho_anyRecHitSwitchToGain6[i] = false;
+        pho_anyRecHitSwitchToGain1[i] = false;
+        pho_cutBasedID_loose[i] = false;
+        pho_cutBasedID_medium[i] = false;
+        pho_cutBasedID_tight[i] = false;
+        pho_mvaValue[i] = -99.0;
+        pho_mvaCategory[i] = -99;
+
         //Jet
         jetE[i] = 0.0;
         jetPt[i] = 0.0;
@@ -1049,42 +1060,42 @@ void RazorTuplizer::resetBranches(){
         jetJetArea[i] = -99.0;
         jetPileupE[i] = -99.0;
         jetPileupId[i] = -99.0;
-	jetPileupIdFlag[i] = -1;
-	jetPassIDLoose[i] = false;
-	jetPassIDTight[i] = false;
-	jetPassMuFrac[i] = false;
-	jetPassEleFrac[i] = false;
+        jetPileupIdFlag[i] = -1;
+        jetPassIDLoose[i] = false;
+        jetPassIDTight[i] = false;
+        jetPassMuFrac[i] = false;
+        jetPassEleFrac[i] = false;
         jetPartonFlavor[i] = 0;
         jetHadronFlavor[i] = 0;
-	jetChargedEMEnergyFraction[i] = -99.0;
-	jetNeutralEMEnergyFraction[i] = -99.0;
-	jetChargedHadronEnergyFraction[i] = -99.0;
-	jetNeutralHadronEnergyFraction[i] = -99.0;
-	jetMuonEnergyFraction[i] = -99.0;
-	jetHOEnergyFraction[i] = -99.0;
-	jetHFHadronEnergyFraction[i] = -99.0;
-	jetHFEMEnergyFraction[i] = -99.0;
+        jetChargedEMEnergyFraction[i] = -99.0;
+        jetNeutralEMEnergyFraction[i] = -99.0;
+        jetChargedHadronEnergyFraction[i] = -99.0;
+        jetNeutralHadronEnergyFraction[i] = -99.0;
+        jetMuonEnergyFraction[i] = -99.0;
+        jetHOEnergyFraction[i] = -99.0;
+        jetHFHadronEnergyFraction[i] = -99.0;
+        jetHFEMEnergyFraction[i] = -99.0;
         jetAllMuonPt[i] = 0.0;
         jetAllMuonEta[i] = 0.0;
         jetAllMuonPhi[i] = 0.0;
         jetAllMuonM[i] = 0.0;
-	jetPtWeightedDZ[i] = 0.0;
-	
+        jetPtWeightedDZ[i] = 0.0;
+
         //AK8 Jet
         fatJetE[i] = 0.0;
         fatJetPt[i] = 0.0;
         fatJetEta[i] = 0.0;
         fatJetPhi[i] = 0.0;
-	fatJetCorrectedPt[i] = 0.0;
+        fatJetCorrectedPt[i] = 0.0;
         fatJetCorrectedEta[i] = 0.0;
         fatJetCorrectedPhi[i] = 0.0;
-	fatJetPrunedM[i] = 0.0;
+        fatJetPrunedM[i] = 0.0;
         fatJetTrimmedM[i] = 0.0;
         fatJetFilteredM[i] = 0.0;
         fatJetSoftDropM[i] = 0.0;
         fatJetCorrectedSoftDropM[i] = 0.0;
-	fatJetUncorrectedSoftDropM[i] = 0.0;
-	fatJetTau1[i] = 0.0;
+        fatJetUncorrectedSoftDropM[i] = 0.0;
+        fatJetTau1[i] = 0.0;
         fatJetTau2[i] = 0.0;
         fatJetTau3[i] = 0.0;
         fatJetMaxSubjetCSV[i] = 0.0;
@@ -2092,7 +2103,12 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
             //*****************************************************************
             //Photon ID MVA variable
             //*****************************************************************
+            pho_cutBasedID_loose[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-loose");
+            pho_cutBasedID_medium[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-medium");
+            pho_cutBasedID_tight[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-tight");
 
+            pho_mvaValue[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v2Values");
+            pho_mvaCategory[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v2Categories");
             //---------------------
             //Use Latest Regression
             //---------------------
