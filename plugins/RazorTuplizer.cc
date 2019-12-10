@@ -135,16 +135,6 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
 			myNonTrigWeights);
 
   //set up photon MVA ID
-  std::vector<std::string> myPhotonMVAWeights;
-  myPhotonMVAWeights.push_back(edm::FileInPath("SUSYBSMAnalysis/RazorTuplizer/data/PhotonIDMVA_Spring15_50ns_v0_EB.weights.xml").fullPath().c_str());
-  myPhotonMVAWeights.push_back(edm::FileInPath("SUSYBSMAnalysis/RazorTuplizer/data/PhotonIDMVA_Spring15_50ns_v0_EE.weights.xml").fullPath().c_str());
-  std::vector<std::string> myPhotonMVAMethodNames;
-  myPhotonMVAMethodNames.push_back("BDTG photons barrel");
-  myPhotonMVAMethodNames.push_back("BDTG photons endcap");
-
-  myPhotonMVA = new EGammaMvaPhotonEstimator();
-  myPhotonMVA->initialize(myPhotonMVAMethodNames,myPhotonMVAWeights,
-			  EGammaMvaPhotonEstimator::kPhotonMVATypeDefault);
 
 
   //*****************************************************************************************
@@ -525,7 +515,6 @@ void RazorTuplizer::enablePhotonBranches(){
   RazorEvents->Branch("pho_passEleVeto", pho_passEleVeto, "pho_passEleVeto[nPhotons]/O");
   RazorEvents->Branch("pho_RegressionE", pho_RegressionE, "pho_RegressionE[nPhotons]/F");
   RazorEvents->Branch("pho_RegressionEUncertainty", pho_RegressionEUncertainty, "pho_RegressionEUncertainty[nPhotons]/F");
-  RazorEvents->Branch("pho_IDMVA", pho_IDMVA, "pho_IDMVA[nPhotons]/F");
   RazorEvents->Branch("pho_superClusterEnergy", pho_superClusterEnergy, "pho_superClusterEnergy[nPhotons]/F");
   RazorEvents->Branch("pho_superClusterRawEnergy", pho_superClusterRawEnergy, "pho_superClusterRawEnergy[nPhotons]/F");
   RazorEvents->Branch("pho_superClusterEta", pho_superClusterEta, "pho_superClusterEta[nPhotons]/F");
@@ -1025,7 +1014,6 @@ void RazorTuplizer::resetBranches(){
         pho_passEleVeto[i] = false;    
         pho_RegressionE[i] = -99.0;
         pho_RegressionEUncertainty[i] = -99.0;
-        pho_IDMVA[i] = -99.0;
 	pho_superClusterEnergy[i] = -99.0;
 	pho_superClusterRawEnergy[i] = -99.0;
         pho_superClusterEta[i]    = -99.0;
@@ -1744,691 +1732,733 @@ bool RazorTuplizer::fillIsoPFCandidates(){
   return true;
 }
 
-bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
 
-  noZS::EcalClusterLazyTools *lazyToolnoZS = new noZS::EcalClusterLazyTools(iEvent, iSetup, ebRecHitsToken_, eeRecHitsToken_);
-  
-  std::vector<unsigned int> idx_OOTphotonsToSkip;
+    noZS::EcalClusterLazyTools *lazyToolnoZS = new noZS::EcalClusterLazyTools(iEvent, iSetup, ebRecHitsToken_, eeRecHitsToken_);
 
-  for(unsigned int ind_photons = 0; ind_photons<photons.size();ind_photons++)
-  {
-	
-    unsigned int idx_OOTphotons = 0;
+    std::vector<unsigned int> idx_OOTphotonsToSkip;
 
-  for (const pat::Photon &pho : *photons[ind_photons]) {
-    if(ind_photons > 0) idx_OOTphotons ++;
-    bool toBeSkipped = false;
-    //for OOT photons, check if this photon is marked as to be skipped
-    if (ind_photons > 0){
-	for(unsigned int i=0; i<idx_OOTphotonsToSkip.size(); i++){
-		if(idx_OOTphotons == idx_OOTphotonsToSkip[i]){
-			toBeSkipped = true;
-			continue;
-		}
-	}	
-    } 
-    //for in-time photons, check if it is overlapped with OOT photons
-    //if overlap, and pT_inTime > pT_OOT, then remove OOT photon
-    //if overlap, and pT_OOT > pT_inTime, then remove in-time photon
-    if (ind_photons == 0 && photons.size()>0){
-	float pt_inTime = pho.pt();
-	float eta_inTime = pho.eta();
-	float phi_inTime = pho.phi();
-	unsigned int idx_OOTphotons_beingchecked = 0;
-	for(unsigned int ind_photons_OOT = 1; ind_photons_OOT<photons.size();ind_photons_OOT++){
-		for (const pat::Photon &pho_OOT : *photons[ind_photons_OOT]) {
-			idx_OOTphotons_beingchecked ++;
-			float deltaR_inTime_OOT = deltaR(eta_inTime, phi_inTime, pho_OOT.eta(), pho_OOT.phi());
-			if(deltaR_inTime_OOT > 0.3) continue;
-			else{
-				if(pt_inTime < pho_OOT.pt()) toBeSkipped = true; // remove the in time photon
-				else idx_OOTphotonsToSkip.push_back(idx_OOTphotons_beingchecked);
-			}
-		}
-	}
-    }
+    for(unsigned int ind_photons = 0; ind_photons<photons.size();ind_photons++)
+    {
 
-    if (toBeSkipped) {
-	//MET correction: if remove inTime photon, add its pt to met pt, because it should not be considered in the met calculation but it was
-	if(ind_photons == 0){
-		metType1Px = metType1Px + pho.px();
-		metType1Py = metType1Py + pho.py();
-		metType1Pt = sqrt(metType1Px*metType1Px+metType1Py*metType1Py); 
-		TVector3 vec_met_temp(metType1Px, metType1Py, 0);
-		metType1Phi = vec_met_temp.Phi();	
-	}
-	if(pho.pt() > 15) nPhotons_overlap ++;
-	continue;
-    }
-    //MET correction: if keep OOT photon, subtract its pt to met pt, because it was originally not considered in the met calculation
-    
-    if(ind_photons > 0){
-	metType1Px = metType1Px - pho.px();
-	metType1Py = metType1Py - pho.py();
-	metType1Pt = sqrt(metType1Px*metType1Px+metType1Py*metType1Py);
-	TVector3 vec_met_temp(metType1Px, metType1Py, 0);
-	metType1Phi = vec_met_temp.Phi();	
-    }
+        unsigned int idx_OOTphotons = 0;
 
-    if (pho.pt() < 15) continue;
+        for (const pat::Photon &pho : *photons[ind_photons]) 
+        {
+            if(ind_photons > 0) idx_OOTphotons ++;
+            bool toBeSkipped = false;
+            //for OOT photons, check if this photon is marked as to be skipped
+            if (ind_photons > 0)
+            {
+                for(unsigned int i=0; i<idx_OOTphotonsToSkip.size(); i++)
+                {
+                    if(idx_OOTphotons == idx_OOTphotonsToSkip[i])
+                    {
+                        toBeSkipped = true;
+                        continue;
+                    }
+                }	
+            } 
+            //for in-time photons, check if it is overlapped with OOT photons
+            //if overlap, and pT_inTime > pT_OOT, then remove OOT photon
+            //if overlap, and pT_OOT > pT_inTime, then remove in-time photon
+            if (ind_photons == 0 && photons.size()>0){
+                float pt_inTime = pho.pt();
+                float eta_inTime = pho.eta();
+                float phi_inTime = pho.phi();
+                unsigned int idx_OOTphotons_beingchecked = 0;
+                for(unsigned int ind_photons_OOT = 1; ind_photons_OOT<photons.size();ind_photons_OOT++)
+                {
+                    for (const pat::Photon &pho_OOT : *photons[ind_photons_OOT]) 
+                    {
+                        idx_OOTphotons_beingchecked ++;
+                        float deltaR_inTime_OOT = deltaR(eta_inTime, phi_inTime, pho_OOT.eta(), pho_OOT.phi());
+                        if(deltaR_inTime_OOT > 0.3) continue;
+                        else
+                        {
+                            if(pt_inTime < pho_OOT.pt()) toBeSkipped = true; // remove the in time photon
+                            else idx_OOTphotonsToSkip.push_back(idx_OOTphotons_beingchecked);
+                        }
+                    }
+                }
+            }
 
-    std::vector<float> vCov = lazyToolnoZS->localCovariances( *(pho.superCluster()->seed()) );
+            if (toBeSkipped) 
+            {
+                //MET correction: if remove inTime photon, add its pt to met pt, because it should not be considered in the met calculation but it was
+                if (ind_photons == 0) 
+                {
+                    metType1Px = metType1Px + pho.px();
+                    metType1Py = metType1Py + pho.py();
+                    metType1Pt = sqrt(metType1Px*metType1Px+metType1Py*metType1Py); 
+                    TVector3 vec_met_temp(metType1Px, metType1Py, 0);
+                    metType1Phi = vec_met_temp.Phi();	
+                }
 
-    //get photon smajor and sminor
-    const auto recHits = (pho.isEB() ? ebRecHits.product() : eeRecHits.product());
-    if(recHits->size() > 0) {
-        Cluster2ndMoments ph2ndMoments = noZS::EcalClusterTools::cluster2ndMoments( *(pho.superCluster()), *recHits);
-        pho_smajor[nPhotons] = ph2ndMoments.sMaj;
-        pho_sminor[nPhotons] = ph2ndMoments.sMin;
-    }
-    //-------------------------------------------------
-    //default photon 4-mometum already vertex corrected
-    //-------------------------------------------------
-    //phoE[nPhotons] = pho.getCorrectedEnergy(reco::Photon::P4type::ecal_standard);
-    phoE[nPhotons]   = pho.energy();
-    phoPt[nPhotons]  = pho.pt();
-    phoEta[nPhotons] = pho.eta(); //correct this for the vertex
-    phoPhi[nPhotons] = pho.phi(); //correct this for the vertex
+                if (pho.pt() > 15) nPhotons_overlap ++;
+                continue;
+            }
+            //MET correction: if keep OOT photon, subtract its pt to met pt, because it was originally not considered in the met calculation
 
-    /*std::cout << "phoE: " << pho.energy() << " phoCorr En:" << pho.getCorrectedEnergy(reco::Photon::P4type::regression2) << " un: " 
-	      << pho.getCorrectedEnergyError(reco::Photon::P4type::regression2) << " " 
-	      << pho.getCorrectedEnergyError( pho.getCandidateP4type() ) << std::endl;
-    */
+            if(ind_photons > 0)
+            {
+                metType1Px = metType1Px - pho.px();
+                metType1Py = metType1Py - pho.py();
+                metType1Pt = sqrt(metType1Px*metType1Px+metType1Py*metType1Py);
+                TVector3 vec_met_temp(metType1Px, metType1Py, 0);
+                metType1Phi = vec_met_temp.Phi();	
+            }
 
-    phoSigmaIetaIeta[nPhotons] = pho.see();
-    phoFull5x5SigmaIetaIeta[nPhotons] = pho.full5x5_sigmaIetaIeta();    
+            if (pho.pt() < 15) continue;
 
-    //phoR9[nPhotons] = pho.r9();
-    //Use the noZS version of this according to Emanuele
-    phoR9[nPhotons] = pho.full5x5_r9();
+            std::vector<float> vCov = lazyToolnoZS->localCovariances( *(pho.superCluster()->seed()) );
 
-    pho_HoverE[nPhotons] = pho.hadTowOverEm();
-    pho_isConversion[nPhotons] = pho.hasConversionTracks();
+            //get photon smajor and sminor
+            const auto recHits = (pho.isEB() ? ebRecHits.product() : eeRecHits.product());
+            if(recHits->size() > 0) 
+            {
+                Cluster2ndMoments ph2ndMoments = noZS::EcalClusterTools::cluster2ndMoments( *(pho.superCluster()), *recHits);
+                pho_smajor[nPhotons] = ph2ndMoments.sMaj;
+                pho_sminor[nPhotons] = ph2ndMoments.sMin;
+            }
+            //-------------------------------------------------
+            //default photon 4-mometum already vertex corrected
+            //-------------------------------------------------
+            //phoE[nPhotons] = pho.getCorrectedEnergy(reco::Photon::P4type::ecal_standard);
+            phoE[nPhotons]   = pho.energy();
+            phoPt[nPhotons]  = pho.pt();
+            phoEta[nPhotons] = pho.eta(); //correct this for the vertex
+            phoPhi[nPhotons] = pho.phi(); //correct this for the vertex
 
-    //pho_passEleVeto[nPhotons] = !hasMatchedPromptElectron(pho.superCluster(),electrons, 
-    //conversions, beamSpot->position());
-    //use this for 2017 dataset and later - originally for synchronization with Myriam (ETH)
-    pho_passEleVeto[nPhotons] = pho.passElectronVeto();
+            /*std::cout << "phoE: " << pho.energy() << " phoCorr En:" << pho.getCorrectedEnergy(reco::Photon::P4type::regression2) << " un: " 
+              << pho.getCorrectedEnergyError(reco::Photon::P4type::regression2) << " " 
+              << pho.getCorrectedEnergyError( pho.getCandidateP4type() ) << std::endl;
+              */
 
-    //**********************************************************
-    // Fill default miniAOD isolation quantities
-    //**********************************************************
-    pho_pfIsoChargedHadronIso[nPhotons] = pho.chargedHadronIso();
-    pho_pfIsoChargedHadronIsoWrongVtx[nPhotons] = pho.chargedHadronIsoWrongVtx();
-    pho_pfIsoNeutralHadronIso[nPhotons] = pho.neutralHadronIso();
-    pho_pfIsoPhotonIso[nPhotons] = pho.photonIso();
-    pho_pfIsoModFrixione[nPhotons] = pho.getPflowIsolationVariables().modFrixione;
-    pho_pfIsoSumPUPt[nPhotons] = pho.sumPUPt();
-    
-    //*************************************************
-    //Gain Switch Flags
-    //*************************************************    
-    const std::vector< std::pair<DetId, float>>& v_id =pho.seed()->hitsAndFractions();
-    float max = 0;
-    // DetId id(0);
-    bool maxSwitchToGain6 = false;
-    bool maxSwitchToGain1 = false;
-    bool anySwitchToGain6 = false;
-    bool anySwitchToGain1 = false;
-    
-    if(ind_photons>0) pho_isStandardPhoton[nPhotons] = false;
-    pho_seedRecHitSwitchToGain6[nPhotons] = maxSwitchToGain6;
-    pho_seedRecHitSwitchToGain1[nPhotons] = maxSwitchToGain1;
-    pho_anyRecHitSwitchToGain6[nPhotons] = anySwitchToGain6;
-    pho_anyRecHitSwitchToGain1[nPhotons] = anySwitchToGain1;
+            phoSigmaIetaIeta[nPhotons] = pho.see();
+            phoFull5x5SigmaIetaIeta[nPhotons] = pho.full5x5_sigmaIetaIeta();    
 
-    for ( size_t i = 0; i < v_id.size(); ++i ) {
-      EcalRecHitCollection::const_iterator it = ebRecHits->find( v_id[i].first );
-      
-      if (it != ebRecHits->end()) {	
-	float energy = it->energy() * v_id[i].second;
-	if (it->checkFlag(EcalRecHit::kHasSwitchToGain6)) anySwitchToGain6 = true;
-	if (it->checkFlag(EcalRecHit::kHasSwitchToGain1)) anySwitchToGain1 = true;
-	if ( energy > max ) {
-	  max = energy;
-	  maxSwitchToGain6 = it->checkFlag(EcalRecHit::kHasSwitchToGain6);
-	  maxSwitchToGain1 = it->checkFlag(EcalRecHit::kHasSwitchToGain1);
-	}
-      } else {
-	//cout << "rechit not found\n";
-      }           
-    }
+            //phoR9[nPhotons] = pho.r9();
+            //Use the noZS version of this according to Emanuele
+            phoR9[nPhotons] = pho.full5x5_r9();
 
-    //*************************************************
-    //Ecal RecHits in Photons
-    //*************************************************    
-    if (enableEcalRechits_) {
-      pho_SeedRechitID.push_back(pho.superCluster()->seed()->seed().rawId());
+            pho_HoverE[nPhotons] = pho.hadTowOverEm();
+            pho_isConversion[nPhotons] = pho.hasConversionTracks();
 
-      std::vector<uint> rechits; rechits.clear();
-      for ( size_t i = 0; i < v_id.size(); ++i ) {
-	EcalRecHitCollection::const_iterator it = ebRecHits->find( v_id[i].first );
+            //pho_passEleVeto[nPhotons] = !hasMatchedPromptElectron(pho.superCluster(),electrons, 
+            //conversions, beamSpot->position());
+            //use this for 2017 dataset and later - originally for synchronization with Myriam (ETH)
+            pho_passEleVeto[nPhotons] = pho.passElectronVeto();
 
-	ecalRechitID_ToBeSaved.push_back(v_id[i].first);
-	rechits.push_back(v_id[i].first.rawId());
+            //**********************************************************
+            // Fill default miniAOD isolation quantities
+            //**********************************************************
+            pho_pfIsoChargedHadronIso[nPhotons] = pho.chargedHadronIso();
+            pho_pfIsoChargedHadronIsoWrongVtx[nPhotons] = pho.chargedHadronIsoWrongVtx();
+            pho_pfIsoNeutralHadronIso[nPhotons] = pho.neutralHadronIso();
+            pho_pfIsoPhotonIso[nPhotons] = pho.photonIso();
+            pho_pfIsoModFrixione[nPhotons] = pho.getPflowIsolationVariables().modFrixione;
+            pho_pfIsoSumPUPt[nPhotons] = pho.sumPUPt();
 
-	if (it != ebRecHits->end()) {	
-	  float energy = it->energy() * v_id[i].second;
-	  if (it->checkFlag(EcalRecHit::kHasSwitchToGain6)) anySwitchToGain6 = true;
-	  if (it->checkFlag(EcalRecHit::kHasSwitchToGain1)) anySwitchToGain1 = true;
-	  if ( energy > max ) {
-	    max = energy;
-	    maxSwitchToGain6 = it->checkFlag(EcalRecHit::kHasSwitchToGain6);
-	    maxSwitchToGain1 = it->checkFlag(EcalRecHit::kHasSwitchToGain1);
-	  }
-	} else {
-	  //cout << "rechit not found\n";
-	}           
-      }
-      pho_EcalRechitID.push_back(rechits);
+            //*************************************************
+            //Gain Switch Flags
+            //*************************************************    
+            const std::vector< std::pair<DetId, float>>& v_id =pho.seed()->hitsAndFractions();
+            float max = 0;
+            // DetId id(0);
+            bool maxSwitchToGain6 = false;
+            bool maxSwitchToGain1 = false;
+            bool anySwitchToGain6 = false;
+            bool anySwitchToGain1 = false;
 
-      //*************************************************
-      //Find relevant rechits
-      //*************************************************
-      ecalRechitEtaPhi_ToBeSaved.push_back( pair<double,double>( pho.superCluster()->eta(), pho.superCluster()->phi() ));
-    }
-    
-  
+            if(ind_photons>0) pho_isStandardPhoton[nPhotons] = false;
+            pho_seedRecHitSwitchToGain6[nPhotons] = maxSwitchToGain6;
+            pho_seedRecHitSwitchToGain1[nPhotons] = maxSwitchToGain1;
+            pho_anyRecHitSwitchToGain6[nPhotons] = anySwitchToGain6;
+            pho_anyRecHitSwitchToGain1[nPhotons] = anySwitchToGain1;
 
-    //**********************************************************
-    //Compute PF isolation
-    //absolute uncorrected isolations with footprint removal
-    //**********************************************************
-    const float coneSizeDR = 0.3;
-    const float dxyMax = 0.1;
-    const float dzMax = 0.2;
-    float chargedIsoSumAllVertices[MAX_NPV];
-    for (int q=0;q<MAX_NPV;++q) chargedIsoSumAllVertices[q] = 0.0;
-    float chargedIsoSum = 0;
-    float neutralHadronIsoSum = 0;
-    float photonIsoSum = 0;
+            for ( size_t i = 0; i < v_id.size(); ++i ) 
+            {
+                EcalRecHitCollection::const_iterator it = ebRecHits->find( v_id[i].first );
 
-    // First, find photon direction with respect to the good PV
-    math::XYZVector photon_directionWrtVtx(pho.superCluster()->x() - myPV->x(),
-					   pho.superCluster()->y() - myPV->y(),
-					   pho.superCluster()->z() - myPV->z());
-    // Loop over all PF candidates
-    for (const pat::PackedCandidate &candidate : *packedPFCands) {
+                if (it != ebRecHits->end()) 
+                {	
+                    float energy = it->energy() * v_id[i].second;
+                    if (it->checkFlag(EcalRecHit::kHasSwitchToGain6)) anySwitchToGain6 = true;
+                    if (it->checkFlag(EcalRecHit::kHasSwitchToGain1)) anySwitchToGain1 = true;
+                    if ( energy > max ) 
+                    {
+                        max = energy;
+                        maxSwitchToGain6 = it->checkFlag(EcalRecHit::kHasSwitchToGain6);
+                        maxSwitchToGain1 = it->checkFlag(EcalRecHit::kHasSwitchToGain1);
+                    }
+                } 
+                else 
+                {
+                    //cout << "rechit not found\n";
+                }           
+            }
 
-     // Check if this candidate is within the isolation cone
-      float dR=deltaR(photon_directionWrtVtx.Eta(),photon_directionWrtVtx.Phi(),
-		      candidate.eta(), candidate.phi());
-      if( dR > coneSizeDR ) continue;
+            //*************************************************
+            //Ecal RecHits in Photons
+            //*************************************************    
+            if (enableEcalRechits_) 
+            {
+                pho_SeedRechitID.push_back(pho.superCluster()->seed()->seed().rawId());
 
-      // Check if this candidate is not in the footprint
-      bool inFootprint = false;      
-      for (auto itr : pho.associatedPackedPFCandidates()) {	
-	if ( &(*itr) == &candidate) {
-	  inFootprint = true;
-	}
-      }     
-      if( inFootprint ) continue;
+                std::vector<uint> rechits; rechits.clear();
+                for ( size_t i = 0; i < v_id.size(); ++i ) 
+                {
+                    EcalRecHitCollection::const_iterator it = ebRecHits->find( v_id[i].first );
+
+                    ecalRechitID_ToBeSaved.push_back(v_id[i].first);
+                    rechits.push_back(v_id[i].first.rawId());
+
+                    if (it != ebRecHits->end()) 
+                    {	
+                        float energy = it->energy() * v_id[i].second;
+                        if (it->checkFlag(EcalRecHit::kHasSwitchToGain6)) anySwitchToGain6 = true;
+                        if (it->checkFlag(EcalRecHit::kHasSwitchToGain1)) anySwitchToGain1 = true;
+                        if ( energy > max ) 
+                        {
+                            max = energy;
+                            maxSwitchToGain6 = it->checkFlag(EcalRecHit::kHasSwitchToGain6);
+                            maxSwitchToGain1 = it->checkFlag(EcalRecHit::kHasSwitchToGain1);
+                        }
+                    } else 
+                    {
+                        //cout << "rechit not found\n";
+                    }           
+                }
+                pho_EcalRechitID.push_back(rechits);
+
+                //*************************************************
+                //Find relevant rechits
+                //*************************************************
+                ecalRechitEtaPhi_ToBeSaved.push_back( pair<double,double>( pho.superCluster()->eta(), pho.superCluster()->phi() ));
+            }
 
 
-      // Find candidate type
-      reco::PFCandidate::ParticleType thisCandidateType = reco::PFCandidate::X;
 
-      // the neutral hadrons and charged hadrons can be of pdgId types
-      // only 130 (K0L) and +-211 (pi+-) in packed candidates
-      const int pdgId = candidate.pdgId();
-      if( pdgId == 22 )
-	thisCandidateType = reco::PFCandidate::gamma;
-      else if( abs(pdgId) == 130) // PDG ID for K0L
-	thisCandidateType = reco::PFCandidate::h0;
-      else if( abs(pdgId) == 211) // PDG ID for pi+-
-	thisCandidateType = reco::PFCandidate::h;
-      
+            //**********************************************************
+            //Compute PF isolation
+            //absolute uncorrected isolations with footprint removal
+            //**********************************************************
+            const float coneSizeDR = 0.3;
+            const float dxyMax = 0.1;
+            const float dzMax = 0.2;
+            float chargedIsoSumAllVertices[MAX_NPV];
+            for (int q=0;q<MAX_NPV;++q) chargedIsoSumAllVertices[q] = 0.0;
+            float chargedIsoSum = 0;
+            float neutralHadronIsoSum = 0;
+            float photonIsoSum = 0;
 
-      // Increment the appropriate isolation sum
-      if( thisCandidateType == reco::PFCandidate::h && candidate.hasTrackDetails() ){
-	// for charged hadrons, additionally check consistency
-	// with the PV
-	float dxy = -999, dz = -999;
+            // First, find photon direction with respect to the good PV
+            math::XYZVector photon_directionWrtVtx(pho.superCluster()->x() - myPV->x(),
+                    pho.superCluster()->y() - myPV->y(),
+                    pho.superCluster()->z() - myPV->z());
+            // Loop over all PF candidates
+            for (const pat::PackedCandidate &candidate : *packedPFCands) {
 
-	//For the primary vertex
-	dz = candidate.pseudoTrack().dz(myPV->position());
-	dxy =candidate.pseudoTrack().dxy(myPV->position());
-	if (fabs(dz) <= dzMax && fabs(dxy) <= dxyMax) {
-	  chargedIsoSum += candidate.pt();
-	}
+                // Check if this candidate is within the isolation cone
+                float dR=deltaR(photon_directionWrtVtx.Eta(),photon_directionWrtVtx.Phi(),
+                        candidate.eta(), candidate.phi());
+                if ( dR > coneSizeDR ) continue;
 
-	//loop over all vertices
-	for(int q = 0; q < nPVAll; q++){
-	  if(!(vertices->at(q).isValid() && !vertices->at(q).isFake())) continue;
+                // Check if this candidate is not in the footprint
+                bool inFootprint = false;      
+                for (auto itr : pho.associatedPackedPFCandidates()) {	
+                    if ( &(*itr) == &candidate) {
+                        inFootprint = true;
+                    }
+                }     
+                if ( inFootprint ) continue;
 
-	  dz = candidate.pseudoTrack().dz(vertices->at(q).position());
-	  dxy =candidate.pseudoTrack().dxy(vertices->at(q).position());
-	  if (fabs(dz) > dzMax) continue;
-	  if(fabs(dxy) > dxyMax) continue;
-	  // The candidate is eligible, increment the isolation
-	  chargedIsoSumAllVertices[q] += candidate.pt();
-	}
-      }
-      if( thisCandidateType == reco::PFCandidate::h0 )
-	neutralHadronIsoSum += candidate.pt();
-      if( thisCandidateType == reco::PFCandidate::gamma )
-	photonIsoSum += candidate.pt();
-    }
 
-    //fill the proper variables
-    for(int q = 0; q < nPVAll; q++) {
-      pho_sumChargedHadronPtAllVertices[nPhotons][q] = chargedIsoSumAllVertices[q];
-    }
-    pho_sumChargedHadronPt[nPhotons] = chargedIsoSum;
-    pho_sumNeutralHadronEt[nPhotons] = neutralHadronIsoSum;
-    pho_sumPhotonEt[nPhotons] = photonIsoSum;
-    pho_ecalPFClusterIso[nPhotons] = pho.ecalPFClusterIso();
-    pho_hcalPFClusterIso[nPhotons] = pho.hcalPFClusterIso();
-    pho_trkSumPtHollowConeDR03[nPhotons] = pho.trkSumPtHollowConeDR03();
-    
-    //*****************************************************************
-    //Compute Worst Isolation Looping over all vertices
-    //*****************************************************************
-    const double ptMin = 0.0;
-    const float dRvetoBarrel = 0.0;
-    const float dRvetoEndcap = 0.0;    
-    float dRveto = 0;
-    if (pho.isEB()) dRveto = dRvetoBarrel;
-    else dRveto = dRvetoEndcap;
-    
-    float worstIsolation = 999;
-    std::vector<float> allIsolations;
-    for(unsigned int ivtx=0; ivtx<vertices->size(); ++ivtx) {
-    
-      // Shift the photon according to the vertex
-      reco::VertexRef vtx(vertices, ivtx);
-      math::XYZVector photon_directionWrtVtx(pho.superCluster()->x() - vtx->x(),
-					     pho.superCluster()->y() - vtx->y(),
-					     pho.superCluster()->z() - vtx->z());
-    
-      float sum = 0;
-      // Loop over all PF candidates
-      for (const pat::PackedCandidate &candidate : *packedPFCands) {
-		
-	//require that PFCandidate is a charged hadron
-	const int pdgId = candidate.pdgId();
-	if( abs(pdgId) != 211) continue;
-	
-	if (candidate.pt() < ptMin)
-	  continue;
-      
-	float dxy = -999, dz = -999;
-	dz = candidate.dz(myPV->position());
-	dxy =candidate.dxy(myPV->position());
-	if( fabs(dxy) > dxyMax) continue;     
-	if ( fabs(dz) > dzMax) continue;
-	
-	float dR = deltaR(photon_directionWrtVtx.Eta(), photon_directionWrtVtx.Phi(), 
-			  candidate.eta(),      candidate.phi());
-	if(dR > coneSizeDR || dR < dRveto) continue;
-	
-	sum += candidate.pt();
-      }
-      
-      allIsolations.push_back(sum);
-    }
+                // Find candidate type
+                reco::PFCandidate::ParticleType thisCandidateType = reco::PFCandidate::X;
 
-    if( allIsolations.size()>0 )
-      worstIsolation = * std::max_element( allIsolations.begin(), allIsolations.end() );
-    
-    pho_sumWorstVertexChargedHadronPt[nPhotons] = worstIsolation;
+                // the neutral hadrons and charged hadrons can be of pdgId types
+                // only 130 (K0L) and +-211 (pi+-) in packed candidates
+                const int pdgId = candidate.pdgId();
+                if( pdgId == 22 )
+                    thisCandidateType = reco::PFCandidate::gamma;
+                else if( abs(pdgId) == 130) // PDG ID for K0L
+                    thisCandidateType = reco::PFCandidate::h0;
+                else if( abs(pdgId) == 211) // PDG ID for pi+-
+                    thisCandidateType = reco::PFCandidate::h;
 
-    //*****************************************************************
-    //Photon ID MVA variable
-    //*****************************************************************
-    pho_IDMVA[nPhotons] = myPhotonMVA->mvaValue( pho,  *rhoAll, photonIsoSum, chargedIsoSum, worstIsolation,
-						 lazyToolnoZS, false);
-				       
-    //pho_RegressionE[nPhotons] = pho.getCorrectedEnergy(reco::Photon::P4type::regression1);
-    //pho_RegressionEUncertainty[nPhotons] = pho.getCorrectedEnergyError(reco::Photon::P4type::regression1);
-    
-    //---------------------
-    //Use Latest Regression
-    //---------------------
-    pho_RegressionE[nPhotons]            = pho.getCorrectedEnergy( pho.getCandidateP4type() );
-    pho_RegressionEUncertainty[nPhotons] = pho.getCorrectedEnergyError( pho.getCandidateP4type() );
-    
-    //default photon 4-momentum is already corrected.
-    //compute photon corrected 4-mometum 
-    /*
-      TVector3 phoPos( pho.superCluster()->x(), pho.superCluster()->y(), pho.superCluster()->z() );
-      TVector3 vtxPos( pvX, pvY, pvZ );
-      TLorentzVector phoP4 = photonP4FromVtx( vtxPos, phoPos, pho_RegressionE[nPhotons] );
-      std::cout << "etaDefault: " << phoEta[nPhotons] << " CP: " << phoP4.Eta() << " phiDefault: " 
-      << phoPhi[nPhotons] << " CP: " << phoP4.Phi() << std::endl;
-      phoEta[nPhotons] = phoP4.Eta();
-      phoPhi[nPhotons] = phoP4.Phi();
-    */
-    
-    //-----------------------
-    // super cluster position
-    //-----------------------  
-    pho_superClusterEnergy[nPhotons] = pho.superCluster()->energy();
-    pho_superClusterRawEnergy[nPhotons] = pho.superCluster()->rawEnergy();
-    pho_superClusterEta[nPhotons]    = pho.superCluster()->eta();
-    pho_superClusterPhi[nPhotons]    = pho.superCluster()->phi();
-    pho_superClusterX[nPhotons]      = pho.superCluster()->x();
-    pho_superClusterY[nPhotons]      = pho.superCluster()->y();
-    pho_superClusterZ[nPhotons]      = pho.superCluster()->z();
-    pho_hasPixelSeed[nPhotons]       = pho.hasPixelSeed();
 
-    //*************************************************
-    //Trigger Object Matching
-    //*************************************************
-    for (pat::TriggerObjectStandAlone trigObject : *triggerObjects) {
-      if (deltaR(trigObject.eta(), trigObject.phi(),pho.eta(),pho.phi()) > 0.3) continue;
-      trigObject.unpackFilterLabels(iEvent, *triggerBits); 
+                // Increment the appropriate isolation sum
+                if ( thisCandidateType == reco::PFCandidate::h && candidate.hasTrackDetails() )
+                {
+                    // for charged hadrons, additionally check consistency
+                    // with the PV
+                    float dxy = -999, dz = -999;
 
-      //check all filters
-      for ( int q=0; q<MAX_PhotonHLTFilters;q++) {
-    	if (trigObject.hasFilterLabel(photonHLTFilterNames[q].c_str())) pho_passHLTFilter[nPhotons][q] = true;
-      }
-    }
-    
-    //conversion matching for beamspot pointing
-    const reco::Conversion *convmatch = 0;
-    double drmin = std::numeric_limits<double>::max();
-    //double leg conversions
-    for (const reco::Conversion &conv : *conversions) {
-      if (conv.refittedPairMomentum().rho()<10.) continue;
-      if (!conv.conversionVertex().isValid()) continue;
-      if (TMath::Prob(conv.conversionVertex().chi2(),  conv.conversionVertex().ndof())<1e-6) continue;
-      
-      math::XYZVector mom(conv.refittedPairMomentum());      
-      math::XYZPoint scpos(pho.superCluster()->position());
-      math::XYZPoint cvtx(conv.conversionVertex().position());
-      math::XYZVector cscvector = scpos - cvtx;
-      
-      double dr = reco::deltaR(mom,cscvector);
-      
-      if (dr<drmin && dr<0.1) {
-        drmin = dr;
-        convmatch = &conv;
-      }
-    }
-    if (!convmatch) {
-      drmin = std::numeric_limits<double>::max();
-      //single leg conversions
-      for (const reco::Conversion &conv : *singleLegConversions) {      
-        math::XYZVector mom(conv.tracksPin()[0]);      
-        math::XYZPoint scpos(pho.superCluster()->position());
-        math::XYZPoint cvtx(conv.conversionVertex().position());
-        math::XYZVector cscvector = scpos - cvtx;
-        
-        double dr = reco::deltaR(mom,cscvector);
-        
-        if (dr<drmin && dr<0.1) {
-          drmin = dr;
-          convmatch = &conv;
+                    //For the primary vertex
+                    dz = candidate.pseudoTrack().dz(myPV->position());
+                    dxy =candidate.pseudoTrack().dxy(myPV->position());
+                    if (fabs(dz) <= dzMax && fabs(dxy) <= dxyMax) 
+                    {
+                        chargedIsoSum += candidate.pt();
+                    }
+
+                    //loop over all vertices
+                    for(int q = 0; q < nPVAll; q++)
+                    {
+                        if(!(vertices->at(q).isValid() && !vertices->at(q).isFake())) continue;
+
+                        dz = candidate.pseudoTrack().dz(vertices->at(q).position());
+                        dxy =candidate.pseudoTrack().dxy(vertices->at(q).position());
+                        if (fabs(dz) > dzMax) continue;
+                        if(fabs(dxy) > dxyMax) continue;
+                        // The candidate is eligible, increment the isolation
+                        chargedIsoSumAllVertices[q] += candidate.pt();
+                    }
+                }
+                if( thisCandidateType == reco::PFCandidate::h0 )
+                    neutralHadronIsoSum += candidate.pt();
+                if( thisCandidateType == reco::PFCandidate::gamma )
+                    photonIsoSum += candidate.pt();
+            }
+
+            //fill the proper variables
+            for(int q = 0; q < nPVAll; q++) 
+            {
+                pho_sumChargedHadronPtAllVertices[nPhotons][q] = chargedIsoSumAllVertices[q];
+            }
+            pho_sumChargedHadronPt[nPhotons] = chargedIsoSum;
+            pho_sumNeutralHadronEt[nPhotons] = neutralHadronIsoSum;
+            pho_sumPhotonEt[nPhotons] = photonIsoSum;
+            pho_ecalPFClusterIso[nPhotons] = pho.ecalPFClusterIso();
+            pho_hcalPFClusterIso[nPhotons] = pho.hcalPFClusterIso();
+            pho_trkSumPtHollowConeDR03[nPhotons] = pho.trkSumPtHollowConeDR03();
+
+            //*****************************************************************
+            //Compute Worst Isolation Looping over all vertices
+            //*****************************************************************
+            const double ptMin = 0.0;
+            const float dRvetoBarrel = 0.0;
+            const float dRvetoEndcap = 0.0;    
+            float dRveto = 0;
+            if (pho.isEB()) dRveto = dRvetoBarrel;
+            else dRveto = dRvetoEndcap;
+
+            float worstIsolation = 999;
+            std::vector<float> allIsolations;
+            for(unsigned int ivtx=0; ivtx<vertices->size(); ++ivtx) 
+            {
+
+                // Shift the photon according to the vertex
+                reco::VertexRef vtx(vertices, ivtx);
+                math::XYZVector photon_directionWrtVtx(pho.superCluster()->x() - vtx->x(),
+                        pho.superCluster()->y() - vtx->y(),
+                        pho.superCluster()->z() - vtx->z());
+
+                float sum = 0;
+                // Loop over all PF candidates
+                for (const pat::PackedCandidate &candidate : *packedPFCands) 
+                {
+                    //require that PFCandidate is a charged hadron
+                    const int pdgId = candidate.pdgId();
+                    if( abs(pdgId) != 211) continue;
+
+                    if (candidate.pt() < ptMin)
+                        continue;
+
+                    float dxy = -999, dz = -999;
+                    dz = candidate.dz(myPV->position());
+                    dxy =candidate.dxy(myPV->position());
+                    if( fabs(dxy) > dxyMax) continue;     
+                    if ( fabs(dz) > dzMax) continue;
+
+                    float dR = deltaR(photon_directionWrtVtx.Eta(), photon_directionWrtVtx.Phi(), 
+                            candidate.eta(),      candidate.phi());
+                    if(dR > coneSizeDR || dR < dRveto) continue;
+
+                    sum += candidate.pt();
+                }
+
+                allIsolations.push_back(sum);
+            }
+
+            if( allIsolations.size()>0 )
+                worstIsolation = * std::max_element( allIsolations.begin(), allIsolations.end() );
+
+            pho_sumWorstVertexChargedHadronPt[nPhotons] = worstIsolation;
+
+            //*****************************************************************
+            //Photon ID MVA variable
+            //*****************************************************************
+
+            //---------------------
+            //Use Latest Regression
+            //---------------------
+            pho_RegressionE[nPhotons]            = pho.getCorrectedEnergy( pho.getCandidateP4type() );
+            pho_RegressionEUncertainty[nPhotons] = pho.getCorrectedEnergyError( pho.getCandidateP4type() );
+
+            //default photon 4-momentum is already corrected.
+            //compute photon corrected 4-mometum 
+            /*
+               TVector3 phoPos( pho.superCluster()->x(), pho.superCluster()->y(), pho.superCluster()->z() );
+               TVector3 vtxPos( pvX, pvY, pvZ );
+               TLorentzVector phoP4 = photonP4FromVtx( vtxPos, phoPos, pho_RegressionE[nPhotons] );
+               std::cout << "etaDefault: " << phoEta[nPhotons] << " CP: " << phoP4.Eta() << " phiDefault: " 
+               << phoPhi[nPhotons] << " CP: " << phoP4.Phi() << std::endl;
+               phoEta[nPhotons] = phoP4.Eta();
+               phoPhi[nPhotons] = phoP4.Phi();
+               */
+
+            //-----------------------
+            // super cluster position
+            //-----------------------  
+            pho_superClusterEnergy[nPhotons] = pho.superCluster()->energy();
+            pho_superClusterRawEnergy[nPhotons] = pho.superCluster()->rawEnergy();
+            pho_superClusterEta[nPhotons]    = pho.superCluster()->eta();
+            pho_superClusterPhi[nPhotons]    = pho.superCluster()->phi();
+            pho_superClusterX[nPhotons]      = pho.superCluster()->x();
+            pho_superClusterY[nPhotons]      = pho.superCluster()->y();
+            pho_superClusterZ[nPhotons]      = pho.superCluster()->z();
+            pho_hasPixelSeed[nPhotons]       = pho.hasPixelSeed();
+
+            //*************************************************
+            //Trigger Object Matching
+            //*************************************************
+            for (pat::TriggerObjectStandAlone trigObject : *triggerObjects) {
+                if (deltaR(trigObject.eta(), trigObject.phi(),pho.eta(),pho.phi()) > 0.3) continue;
+                trigObject.unpackFilterLabels(iEvent, *triggerBits); 
+
+                //check all filters
+                for ( int q=0; q<MAX_PhotonHLTFilters;q++) {
+                    if (trigObject.hasFilterLabel(photonHLTFilterNames[q].c_str())) pho_passHLTFilter[nPhotons][q] = true;
+                }
+            }
+
+            //conversion matching for beamspot pointing
+            const reco::Conversion *convmatch = 0;
+            double drmin = std::numeric_limits<double>::max();
+            //double leg conversions
+            for (const reco::Conversion &conv : *conversions) {
+                if (conv.refittedPairMomentum().rho()<10.) continue;
+                if (!conv.conversionVertex().isValid()) continue;
+                if (TMath::Prob(conv.conversionVertex().chi2(),  conv.conversionVertex().ndof())<1e-6) continue;
+
+                math::XYZVector mom(conv.refittedPairMomentum());      
+                math::XYZPoint scpos(pho.superCluster()->position());
+                math::XYZPoint cvtx(conv.conversionVertex().position());
+                math::XYZVector cscvector = scpos - cvtx;
+
+                double dr = reco::deltaR(mom,cscvector);
+
+                if (dr<drmin && dr<0.1) {
+                    drmin = dr;
+                    convmatch = &conv;
+                }
+            }
+            if (!convmatch) {
+                drmin = std::numeric_limits<double>::max();
+                //single leg conversions
+                for (const reco::Conversion &conv : *singleLegConversions) {      
+                    math::XYZVector mom(conv.tracksPin()[0]);      
+                    math::XYZPoint scpos(pho.superCluster()->position());
+                    math::XYZPoint cvtx(conv.conversionVertex().position());
+                    math::XYZVector cscvector = scpos - cvtx;
+
+                    double dr = reco::deltaR(mom,cscvector);
+
+                    if (dr<drmin && dr<0.1) {
+                        drmin = dr;
+                        convmatch = &conv;
+                    }
+                }
+            }
+
+            //matched conversion, compute conversion type
+            //and extrapolation to beamline
+            //*FIXME* Both of these additional two requirements are inconsistent and make the conversion
+            //selection depend on poorly defined criteria, but we keep them for sync purposes
+            if (convmatch && pho.hasConversionTracks() && conversions->size()>0) 
+            {
+                int ntracks = convmatch->nTracks();
+
+                math::XYZVector mom(ntracks==2 ? convmatch->refittedPairMomentum() : convmatch->tracksPin()[0]);      
+                math::XYZPoint scpos(pho.superCluster()->position());
+                math::XYZPoint cvtx(convmatch->conversionVertex().position());
+                math::XYZVector cscvector = scpos - cvtx;
+
+                double z = cvtx.z();
+                double rho = cvtx.rho();
+
+                int legtype = ntracks==2 ? 0 : 1;
+                int dettype = pho.isEB() ? 0 : 1;
+                int postype =0;
+
+                if (pho.isEB()) 
+                {
+                    if (rho<15.) 
+                    {
+                        postype = 0;
+                    }
+                    else if (rho>=15. && rho<60.) 
+                    {
+                        postype = 1;
+                    }
+                    else 
+                    {
+                        postype = 2;
+                    }
+                }
+                else 
+                {
+                    if (std::abs(z) < 50.) 
+                    {
+                        postype = 0;
+                    }
+                    else if (std::abs(z) >= 50. && std::abs(z) < 100.) 
+                    {
+                        postype = 1;
+                    }
+                    else 
+                    {
+                        postype = 2;
+                    }
+                }
+
+                pho_convType[nPhotons] = legtype + 2*dettype + 4*postype;
+                pho_convTrkZ[nPhotons] = cvtx.z() - ((cvtx.x()-beamSpot->x0())*mom.x()+(cvtx.y()-beamSpot->y0())*mom.y())/mom.rho() * mom.z()/mom.rho();
+                pho_convTrkClusZ[nPhotons] = cvtx.z() - ((cvtx.x()-beamSpot->x0())*cscvector.x()+(cvtx.y()-beamSpot->y0())*cscvector.y())/cscvector.rho() * cscvector.z()/cscvector.rho();
+            }
+
+            nPhotons++;
         }
-      }
-    }
-    
-    //matched conversion, compute conversion type
-    //and extrapolation to beamline
-    //*FIXME* Both of these additional two requirements are inconsistent and make the conversion
-    //selection depend on poorly defined criteria, but we keep them for sync purposes
-    if (convmatch && pho.hasConversionTracks() && conversions->size()>0) {
-      int ntracks = convmatch->nTracks();
-      
-      math::XYZVector mom(ntracks==2 ? convmatch->refittedPairMomentum() : convmatch->tracksPin()[0]);      
-      math::XYZPoint scpos(pho.superCluster()->position());
-      math::XYZPoint cvtx(convmatch->conversionVertex().position());
-      math::XYZVector cscvector = scpos - cvtx;
 
-      double z = cvtx.z();
-      double rho = cvtx.rho();
-
-      int legtype = ntracks==2 ? 0 : 1;
-      int dettype = pho.isEB() ? 0 : 1;
-      int postype =0;
-      
-      if (pho.isEB()) {
-        if (rho<15.) {
-          postype = 0;
-        }
-        else if (rho>=15. && rho<60.) {
-          postype = 1;
-        }
-        else {
-          postype = 2;
-        }
-      }
-      else {
-        if (std::abs(z) < 50.) {
-          postype = 0;
-        }
-        else if (std::abs(z) >= 50. && std::abs(z) < 100.) {
-          postype = 1;
-        }
-        else {
-          postype = 2;
-        }
-      }
-      
-      pho_convType[nPhotons] = legtype + 2*dettype + 4*postype;
-      pho_convTrkZ[nPhotons] = cvtx.z() - ((cvtx.x()-beamSpot->x0())*mom.x()+(cvtx.y()-beamSpot->y0())*mom.y())/mom.rho() * mom.z()/mom.rho();
-      pho_convTrkClusZ[nPhotons] = cvtx.z() - ((cvtx.x()-beamSpot->x0())*cscvector.x()+(cvtx.y()-beamSpot->y0())*cscvector.y())/cscvector.rho() * cscvector.z()/cscvector.rho();
     }
 
-    nPhotons++;
-  }
-  
-  }
+    double pho_vtxSumPxD[OBJECTARRAYSIZE][MAX_NPV];
+    double pho_vtxSumPyD[OBJECTARRAYSIZE][MAX_NPV];
 
-  double pho_vtxSumPxD[OBJECTARRAYSIZE][MAX_NPV];
-  double pho_vtxSumPyD[OBJECTARRAYSIZE][MAX_NPV];
-  
-  for (int ipho = 0; ipho<nPhotons; ++ipho) {
-    for (int ipv = 0; ipv<nPVAll; ++ipv) {
-      pho_vtxSumPxD[ipho][ipv] = 0.;
-      pho_vtxSumPyD[ipho][ipv] = 0.;
-    }
-  }
-  
-  
-  //fill information on tracks to exclude around photons for vertex selection purposes
-  for (const pat::PackedCandidate &pfcand : *packedPFCands) {
-    if (pfcand.charge()==0) continue;
-
-    double mindz = std::numeric_limits<double>::max();
-    int ipvmin = -1;
-    for (int ipv = 0; ipv < nPVAll; ++ipv) {
-      const reco::Vertex &vtx = vertices->at(ipv);
-      double dz = std::abs(pfcand.dz(vtx.position()));
-      if (dz<mindz) {
-        mindz = dz;
-        ipvmin = ipv;
-      }
-    }
-    
-    if (mindz<0.2 && ipvmin>=0 && ipvmin<MAX_NPV) {
-      const reco::Vertex &vtx = vertices->at(ipvmin);
-        unsigned int gr_pho = 0;
-	unsigned int ind_in_group = 0;
-	unsigned int num_allpho_last_group = 0;
-	unsigned int ind_allpho = 0;
-      for (int ipho = 0; ipho < nPhotons; ++ipho) {
-	if(ind_allpho - num_allpho_last_group + 1 > photons[gr_pho]->size())
-	{
-		gr_pho++;
-		ind_in_group = 0;
-		num_allpho_last_group = ind_allpho;
-		
-	}
-	
-        const pat::Photon &pho = photons[gr_pho]->at(ind_in_group);
-        math::XYZVector phodir(pho.superCluster()->x()-vtx.x(),pho.superCluster()->y()-vtx.y(),pho.superCluster()->z()-vtx.z());
-        double dr = reco::deltaR(phodir, pfcand);
-        if (dr<0.05) {
-          pho_vtxSumPxD[ipho][ipvmin] += pfcand.px();
-          pho_vtxSumPyD[ipho][ipvmin] += pfcand.py();
+    for (int ipho = 0; ipho<nPhotons; ++ipho) 
+    {
+        for (int ipv = 0; ipv<nPVAll; ++ipv) 
+        {
+            pho_vtxSumPxD[ipho][ipv] = 0.;
+            pho_vtxSumPyD[ipho][ipv] = 0.;
         }
-	
-	ind_in_group ++;
-	ind_allpho ++;
-      }
     }
-  }
-  
-  for (int ipho = 0; ipho<nPhotons; ++ipho) {
-    for (int ipv = 0; ipv<nPVAll; ++ipv) {
-      pho_vtxSumPx[ipho][ipv] = pho_vtxSumPxD[ipho][ipv];
-      pho_vtxSumPy[ipho][ipv] = pho_vtxSumPyD[ipho][ipv];
+
+
+    //fill information on tracks to exclude around photons for vertex selection purposes
+    for (const pat::PackedCandidate &pfcand : *packedPFCands) 
+    {
+        if (pfcand.charge()==0) continue;
+
+        double mindz = std::numeric_limits<double>::max();
+        int ipvmin = -1;
+        for (int ipv = 0; ipv < nPVAll; ++ipv) 
+        {
+            const reco::Vertex &vtx = vertices->at(ipv);
+            double dz = std::abs(pfcand.dz(vtx.position()));
+            if (dz<mindz) 
+            {
+                mindz = dz;
+                ipvmin = ipv;
+            }
+        }
+
+        if (mindz<0.2 && ipvmin>=0 && ipvmin<MAX_NPV) 
+        {
+            const reco::Vertex &vtx = vertices->at(ipvmin);
+            unsigned int gr_pho = 0;
+            unsigned int ind_in_group = 0;
+            unsigned int num_allpho_last_group = 0;
+            unsigned int ind_allpho = 0;
+            for (int ipho = 0; ipho < nPhotons; ++ipho) 
+            {
+                if(ind_allpho - num_allpho_last_group + 1 > photons[gr_pho]->size())
+                {
+                    gr_pho++;
+                    ind_in_group = 0;
+                    num_allpho_last_group = ind_allpho;
+
+                }
+
+                const pat::Photon &pho = photons[gr_pho]->at(ind_in_group);
+                math::XYZVector phodir(pho.superCluster()->x()-vtx.x(),pho.superCluster()->y()-vtx.y(),pho.superCluster()->z()-vtx.z());
+                double dr = reco::deltaR(phodir, pfcand);
+                if (dr<0.05) 
+                {
+                    pho_vtxSumPxD[ipho][ipvmin] += pfcand.px();
+                    pho_vtxSumPyD[ipho][ipvmin] += pfcand.py();
+                }
+
+                ind_in_group ++;
+                ind_allpho ++;
+            }
+        }
     }
-  }
-  
-  delete lazyToolnoZS;
-  return true;
+
+    for (int ipho = 0; ipho<nPhotons; ++ipho) 
+    {
+        for (int ipv = 0; ipv<nPVAll; ++ipv) 
+        {
+            pho_vtxSumPx[ipho][ipv] = pho_vtxSumPxD[ipho][ipv];
+            pho_vtxSumPy[ipho][ipv] = pho_vtxSumPyD[ipho][ipv];
+        }
+    }
+
+    delete lazyToolnoZS;
+    return true;
 };
 
 
 bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSetup& iSetup){  
 
-  // geometry (from ECAL ELF)
-  edm::ESHandle<CaloGeometry> geoHandle;
-  iSetup.get<CaloGeometryRecord>().get(geoHandle);
-  const CaloSubdetectorGeometry *barrelGeometry = geoHandle->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
-  const CaloSubdetectorGeometry *endcapGeometry = geoHandle->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
+    // geometry (from ECAL ELF)
+    edm::ESHandle<CaloGeometry> geoHandle;
+    iSetup.get<CaloGeometryRecord>().get(geoHandle);
+    const CaloSubdetectorGeometry *barrelGeometry = geoHandle->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
+    const CaloSubdetectorGeometry *endcapGeometry = geoHandle->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
 
-  std::map<uint, uint> mapRecHitIdToIndex; mapRecHitIdToIndex.clear();
-  uint rechitIndex = 0;
+    std::map<uint, uint> mapRecHitIdToIndex; mapRecHitIdToIndex.clear();
+    uint rechitIndex = 0;
 
-  //ECAL conditions
-  edm::ESHandle<EcalLaserDbService> laser_;
-  iSetup.get<EcalLaserDbRecord>().get(laser_);
+    //ECAL conditions
+    edm::ESHandle<EcalLaserDbService> laser_;
+    iSetup.get<EcalLaserDbRecord>().get(laser_);
 
-  //Barrel Rechits
-  for (EcalRecHitCollection::const_iterator recHit = ebRecHits->begin(); recHit != ebRecHits->end(); ++recHit) {
-    // first get detector id
-    
-    const DetId recHitId = recHit->detid();
-    //const uint32_t rhId  = recHitId.rawId();
+    //Barrel Rechits
+    for (EcalRecHitCollection::const_iterator recHit = ebRecHits->begin(); recHit != ebRecHits->end(); ++recHit) {
+        // first get detector id
 
-    //Find rechits by ID that are explicitly marked to be saved.
-    bool matchedRechit = false;
-    std::vector<uint>::iterator it;
-    it = find (ecalRechitID_ToBeSaved.begin(), ecalRechitID_ToBeSaved.end(), recHitId.rawId());
-    if (it == ecalRechitID_ToBeSaved.end()) {      
-      matchedRechit = true;
-    }
-  
-    const auto recHitPos = barrelGeometry->getGeometry(recHitId)->getPosition();
+        const DetId recHitId = recHit->detid();
+        //const uint32_t rhId  = recHitId.rawId();
 
-    //Find rechits by deltaR proximity
-    bool dRProximity = false;
-    for (int k=0; k<int(ecalRechitEtaPhi_ToBeSaved.size()); ++k) {
-      if ( deltaR(ecalRechitEtaPhi_ToBeSaved[k].first, ecalRechitEtaPhi_ToBeSaved[k].second, 
-		  recHitPos.eta(), recHitPos.phi()) < 0.5) {
-	dRProximity = true;
-      }
-    }
+        //Find rechits by ID that are explicitly marked to be saved.
+        bool matchedRechit = false;
+        std::vector<uint>::iterator it;
+        it = find (ecalRechitID_ToBeSaved.begin(), ecalRechitID_ToBeSaved.end(), recHitId.rawId());
+        if (it == ecalRechitID_ToBeSaved.end()) {      
+            matchedRechit = true;
+        }
 
-    bool dRJetProximity = false;
+        const auto recHitPos = barrelGeometry->getGeometry(recHitId)->getPosition();
 
-    for (int k=0; k<int(ecalRechitJetEtaPhi_ToBeSaved.size()); ++k) {
-      if ( deltaR(ecalRechitJetEtaPhi_ToBeSaved[k].first, ecalRechitJetEtaPhi_ToBeSaved[k].second, 
-		  recHitPos.eta(), recHitPos.phi()) < 0.7) {
-	dRJetProximity = true;
-      }
-    }
+        //Find rechits by deltaR proximity
+        bool dRProximity = false;
+        for (int k=0; k<int(ecalRechitEtaPhi_ToBeSaved.size()); ++k) {
+            if ( deltaR(ecalRechitEtaPhi_ToBeSaved[k].first, ecalRechitEtaPhi_ToBeSaved[k].second, 
+                        recHitPos.eta(), recHitPos.phi()) < 0.5) {
+                dRProximity = true;
+            }
+        }
 
-    //skip rechits that are not relevant
-    if (!(matchedRechit || dRProximity || dRJetProximity)) {
-      continue;
-    }
+        bool dRJetProximity = false;
 
-    mapRecHitIdToIndex[recHitId.rawId()] = rechitIndex;
-    ecalRechit_ID->push_back(recHitId.rawId());
-    ecalRechit_Eta->push_back(recHitPos.eta());
-    ecalRechit_Phi->push_back(recHitPos.phi());
-    ecalRechit_X->push_back(recHitPos.x());
-    ecalRechit_Y->push_back(recHitPos.y());
-    ecalRechit_Z->push_back(recHitPos.z());
-    ecalRechit_E->push_back(recHit->energy());
-    ecalRechit_T->push_back(recHit->time());
-    ecalRechit_FlagOOT->push_back(recHit->checkFlag(EcalRecHit::kOutOfTime));
-    ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
-    ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
-    ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
-    rechitIndex++;
-  }
-  
-  //Endcap Rechits
-  for (EcalRecHitCollection::const_iterator recHit = eeRecHits->begin(); recHit != eeRecHits->end(); ++recHit) {
-    // first get detector id
-    
-    const DetId recHitId = recHit->detid();
-    // const uint32_t rhId  = recHitId.rawId();
- 
-   bool matchedRechit = false;
-    std::vector<uint>::iterator it;
-    it = find (ecalRechitID_ToBeSaved.begin(), ecalRechitID_ToBeSaved.end(), recHitId.rawId());
-    if (it == ecalRechitID_ToBeSaved.end()) {
-      matchedRechit = true;
-    }
-  
-    const auto recHitPos = endcapGeometry->getGeometry(recHitId)->getPosition();
- 
-    //Find rechits by deltaR proximity
-    bool dRProximity = false;
-    for (int k=0; k<int(ecalRechitEtaPhi_ToBeSaved.size()); ++k) {
-      if ( deltaR(ecalRechitEtaPhi_ToBeSaved[k].first, ecalRechitEtaPhi_ToBeSaved[k].second, 
-		  recHitPos.eta(), recHitPos.phi()) < 0.5) {
-	dRProximity = true;
-      }
+        for (int k=0; k<int(ecalRechitJetEtaPhi_ToBeSaved.size()); ++k) {
+            if ( deltaR(ecalRechitJetEtaPhi_ToBeSaved[k].first, ecalRechitJetEtaPhi_ToBeSaved[k].second, 
+                        recHitPos.eta(), recHitPos.phi()) < 0.7) {
+                dRJetProximity = true;
+            }
+        }
+
+        //skip rechits that are not relevant
+        if (!(matchedRechit || dRProximity || dRJetProximity)) {
+            continue;
+        }
+
+        mapRecHitIdToIndex[recHitId.rawId()] = rechitIndex;
+        ecalRechit_ID->push_back(recHitId.rawId());
+        ecalRechit_Eta->push_back(recHitPos.eta());
+        ecalRechit_Phi->push_back(recHitPos.phi());
+        ecalRechit_X->push_back(recHitPos.x());
+        ecalRechit_Y->push_back(recHitPos.y());
+        ecalRechit_Z->push_back(recHitPos.z());
+        ecalRechit_E->push_back(recHit->energy());
+        ecalRechit_T->push_back(recHit->time());
+        ecalRechit_FlagOOT->push_back(recHit->checkFlag(EcalRecHit::kOutOfTime));
+        ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
+        ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
+        ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
+        rechitIndex++;
     }
 
-    bool dRJetProximity = false;
-    for (int k=0; k<int(ecalRechitJetEtaPhi_ToBeSaved.size()); ++k) {
-      if ( deltaR(ecalRechitJetEtaPhi_ToBeSaved[k].first, ecalRechitJetEtaPhi_ToBeSaved[k].second, 
-		  recHitPos.eta(), recHitPos.phi()) < 0.7) {
-	dRJetProximity = true;
-      }
+    //Endcap Rechits
+    for (EcalRecHitCollection::const_iterator recHit = eeRecHits->begin(); recHit != eeRecHits->end(); ++recHit) {
+        // first get detector id
+
+        const DetId recHitId = recHit->detid();
+        // const uint32_t rhId  = recHitId.rawId();
+
+        bool matchedRechit = false;
+        std::vector<uint>::iterator it;
+        it = find (ecalRechitID_ToBeSaved.begin(), ecalRechitID_ToBeSaved.end(), recHitId.rawId());
+        if (it == ecalRechitID_ToBeSaved.end()) {
+            matchedRechit = true;
+        }
+
+        const auto recHitPos = endcapGeometry->getGeometry(recHitId)->getPosition();
+
+        //Find rechits by deltaR proximity
+        bool dRProximity = false;
+        for (int k=0; k<int(ecalRechitEtaPhi_ToBeSaved.size()); ++k) {
+            if ( deltaR(ecalRechitEtaPhi_ToBeSaved[k].first, ecalRechitEtaPhi_ToBeSaved[k].second, 
+                        recHitPos.eta(), recHitPos.phi()) < 0.5) {
+                dRProximity = true;
+            }
+        }
+
+        bool dRJetProximity = false;
+        for (int k=0; k<int(ecalRechitJetEtaPhi_ToBeSaved.size()); ++k) {
+            if ( deltaR(ecalRechitJetEtaPhi_ToBeSaved[k].first, ecalRechitJetEtaPhi_ToBeSaved[k].second, 
+                        recHitPos.eta(), recHitPos.phi()) < 0.7) {
+                dRJetProximity = true;
+            }
+        }
+
+        //skip rechits that are not relevant
+        if (!(matchedRechit || dRProximity || dRJetProximity)) {
+            continue;
+        }
+
+        mapRecHitIdToIndex[recHitId.rawId()] = rechitIndex;
+        ecalRechit_ID->push_back(recHitId.rawId());
+        ecalRechit_Eta->push_back(recHitPos.eta());
+        ecalRechit_Phi->push_back(recHitPos.phi());
+        ecalRechit_X->push_back(recHitPos.x());
+        ecalRechit_Y->push_back(recHitPos.y());
+        ecalRechit_Z->push_back(recHitPos.z());
+        ecalRechit_E->push_back(recHit->energy());
+        ecalRechit_T->push_back(recHit->time());
+        ecalRechit_FlagOOT->push_back(recHit->checkFlag(EcalRecHit::kOutOfTime));
+        ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
+        ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
+        ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
+        rechitIndex++;
+
     }
 
-    //skip rechits that are not relevant
-    if (!(matchedRechit || dRProximity || dRJetProximity)) {
-      continue;
+    //Fill Rechit Indices for electrons and photons
+    for (uint k=0; k<ele_EcalRechitID.size(); k++) {
+        std::vector<uint> tmpVector;
+        for (uint l=0; l<ele_EcalRechitID[k].size(); l++) {
+            tmpVector.push_back(mapRecHitIdToIndex[ele_EcalRechitID[k][l]]);
+        }
+        ele_EcalRechitIndex->push_back(tmpVector);
+        ele_SeedRechitIndex->push_back(mapRecHitIdToIndex[ele_SeedRechitID[k]]);
+    }
+    for (uint k=0; k<pho_EcalRechitID.size(); k++) {
+        std::vector<uint> tmpVector;
+        for (uint l=0; l<pho_EcalRechitID[k].size(); l++) {
+            tmpVector.push_back(mapRecHitIdToIndex[pho_EcalRechitID[k][l]]);
+        }
+        pho_EcalRechitIndex->push_back(tmpVector);
+        pho_SeedRechitIndex->push_back(mapRecHitIdToIndex[pho_SeedRechitID[k]]);
     }
 
-    mapRecHitIdToIndex[recHitId.rawId()] = rechitIndex;
-    ecalRechit_ID->push_back(recHitId.rawId());
-    ecalRechit_Eta->push_back(recHitPos.eta());
-    ecalRechit_Phi->push_back(recHitPos.phi());
-    ecalRechit_X->push_back(recHitPos.x());
-    ecalRechit_Y->push_back(recHitPos.y());
-    ecalRechit_Z->push_back(recHitPos.z());
-    ecalRechit_E->push_back(recHit->energy());
-    ecalRechit_T->push_back(recHit->time());
-    ecalRechit_FlagOOT->push_back(recHit->checkFlag(EcalRecHit::kOutOfTime));
-    ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
-    ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
-    ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
-    rechitIndex++;
 
-  }
-  
-  //Fill Rechit Indices for electrons and photons
-  for (uint k=0; k<ele_EcalRechitID.size(); k++) {
-    std::vector<uint> tmpVector;
-    for (uint l=0; l<ele_EcalRechitID[k].size(); l++) {
-      tmpVector.push_back(mapRecHitIdToIndex[ele_EcalRechitID[k][l]]);
-    }
-    ele_EcalRechitIndex->push_back(tmpVector);
-    ele_SeedRechitIndex->push_back(mapRecHitIdToIndex[ele_SeedRechitID[k]]);
-  }
-  for (uint k=0; k<pho_EcalRechitID.size(); k++) {
-    std::vector<uint> tmpVector;
-    for (uint l=0; l<pho_EcalRechitID[k].size(); l++) {
-      tmpVector.push_back(mapRecHitIdToIndex[pho_EcalRechitID[k][l]]);
-    }
-    pho_EcalRechitIndex->push_back(tmpVector);
-    pho_SeedRechitIndex->push_back(mapRecHitIdToIndex[pho_SeedRechitID[k]]);
- }
- 
-
-  return true;
+    return true;
 }
 
 
