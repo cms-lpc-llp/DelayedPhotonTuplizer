@@ -555,18 +555,18 @@ protected:
   vector<uint> ecalRechitID_ToBeSaved;
   vector<pair<double,double> > ecalRechitEtaPhi_ToBeSaved;
   vector<pair<double,double> > ecalRechitJetEtaPhi_ToBeSaved;
-  vector<float> *ecalRechit_Eta;
-  vector<float> *ecalRechit_Phi;
-  vector<float> *ecalRechit_X;
-  vector<float> *ecalRechit_Y;
-  vector<float> *ecalRechit_Z;
-  vector<float> *ecalRechit_E;
-  vector<float> *ecalRechit_T;
+  vector<Float16_t> *ecalRechit_Eta;
+  vector<Float16_t> *ecalRechit_Phi;
+  vector<Float16_t> *ecalRechit_X;
+  vector<Float16_t> *ecalRechit_Y;
+  vector<Float16_t> *ecalRechit_Z;
+  vector<Float16_t> *ecalRechit_E;
+  vector<Float16_t> *ecalRechit_T;
   vector<uint> *ecalRechit_ID;
   vector<bool> *ecalRechit_FlagOOT;
   vector<bool> *ecalRechit_GainSwitch1;
   vector<bool> *ecalRechit_GainSwitch6;
-  vector<float> *ecalRechit_transpCorr;
+  vector<Float16_t> *ecalRechit_transpCorr;
 
   //AK4 Jets
   int nJets;
