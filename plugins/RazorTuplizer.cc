@@ -2103,12 +2103,12 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
             //*****************************************************************
             //Photon ID MVA variable
             //*****************************************************************
-            pho_cutBasedID_loose[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-loose");
-            pho_cutBasedID_medium[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-medium");
-            pho_cutBasedID_tight[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V2-tight");
+            pho_cutBasedID_loose[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-loose");
+            pho_cutBasedID_medium[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-medium");
+            pho_cutBasedID_tight[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-tight");
 
-            pho_mvaValue[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v2Values");
-            pho_mvaCategory[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v2Categories");
+            pho_mvaValue[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v1Values");
+            pho_mvaCategory[nPhotons] = pho.userInt("PhotonMVAEstimatorRunIIFall17v1Categories");
             //---------------------
             //Use Latest Regression
             //---------------------
