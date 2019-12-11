@@ -111,8 +111,8 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
 
   //set up electron MVA ID
   std::vector<std::string> myTrigWeights;
-  myTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
-  myTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
+  myTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
+  myTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
 
   myMVATrig = new EGammaMvaEleEstimatorCSA14();
   myMVATrig->initialize("BDT",
@@ -121,12 +121,12 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
 			myTrigWeights);
 
   std::vector<std::string> myNonTrigWeights;
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EB1_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EB2_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EE_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EB1_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EB2_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
-  myNonTrigWeights.push_back(edm::FileInPath("DelayedPhotonTuplizer/data/EIDmva_EE_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EB1_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EB2_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EE_5_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EB1_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EB2_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
+  myNonTrigWeights.push_back(edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/EIDmva_EE_10_oldNonTrigSpring15_ConvVarCwoBoolean_TMVA412_FullStatLowPt_PairNegWeightsGlobal_BDT.weights.xml").fullPath().c_str());
   
   myMVANonTrig = new ElectronMVAEstimatorRun2NonTrig();
   myMVANonTrig->initialize("BDTG method",
@@ -3110,7 +3110,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
             
       if (pdfidx == 263000) {
 	//NNPDF30_lo_as_0130 (nf5) for LO madgraph samples and SUSY signals
-	pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_hessian_60.csv"));
+	pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_hessian_60.csv"));
 	firstPdfWeight = 11;
 	lastPdfWeight = 110;
 	firstAlphasWeight = -1;
@@ -3118,7 +3118,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
       }
       else if (pdfidx == 263400) {
 	//NNPdf30_lo_as_0130_nf4 for LO madgraph samples
-	pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
+	pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
 	firstPdfWeight = 112;
 	lastPdfWeight = 211;
 	firstAlphasWeight = -1;
@@ -3127,7 +3127,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
       else if (pdfidx == 260000 || pdfidx == -1) {
 	//NNPdf30_nlo_as_0118 (nf5) for NLO powheg samples
 	//(work around apparent bug in current powheg samples by catching "-1" as well)
-	pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+	pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
 	firstPdfWeight = 10;
 	lastPdfWeight = 109;
 	firstAlphasWeight = 110;
@@ -3135,7 +3135,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
       }
       else if (pdfidx == 292200) {
 	//NNPdf30_nlo_as_0118 (nf5) with built-in alphas variations for NLO aMC@NLO samples
-	pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+	pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
 	firstPdfWeight = 10;
 	lastPdfWeight = 109;
 	firstAlphasWeight = 110;
@@ -3143,7 +3143,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
       }   
       else if (pdfidx == 292000) {
 	//NNPdf30_nlo_as_0118_nf4 with built-in alphas variations for NLO aMC@NLO samples
-	pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
+	pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
 	firstPdfWeight = 10;
 	lastPdfWeight = 109;
 	firstAlphasWeight = 110;
@@ -3164,7 +3164,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
       
 	if (pdfidx == 263000) {
 	  //NNPDF30_lo_as_0130 (nf5) for LO madgraph samples and SUSY signals
-	  pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_hessian_60.csv"));
+	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_hessian_60.csv"));
 	  firstPdfWeight = 10;
 	  lastPdfWeight = 109;
 	  firstAlphasWeight = -1;
@@ -3172,7 +3172,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 	}
 	else if (pdfidx == 263400) {
 	  //NNPdf30_lo_as_0130_nf4 for LO madgraph samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
+	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
 	  firstPdfWeight = 111;
 	  lastPdfWeight = 210;
 	  firstAlphasWeight = -1;
@@ -3181,7 +3181,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 	else if (pdfidx == 260000 || pdfidx == -1) {
 	  //NNPdf30_nlo_as_0118 (nf5) for NLO powheg samples
 	  //(work around apparent bug in current powheg samples by catching "-1" as well)
-	  pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
 	  firstPdfWeight = 9;
 	  lastPdfWeight = 108;
 	  firstAlphasWeight = 109;
@@ -3189,7 +3189,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 	}
 	else if (pdfidx == 292200) {
 	  //NNPdf30_nlo_as_0118 (nf5) with built-in alphas variations for NLO aMC@NLO samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
 	  firstPdfWeight = 9;
 	  lastPdfWeight = 108;
 	  firstAlphasWeight = 109;
@@ -3197,7 +3197,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 	}   
 	else if (pdfidx == 292000) {
 	  //NNPdf30_nlo_as_0118_nf4 with built-in alphas variations for NLO aMC@NLO samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
+	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
 	  firstPdfWeight = 9;
 	  lastPdfWeight = 108;
 	  firstAlphasWeight = 109;

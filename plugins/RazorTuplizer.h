@@ -55,11 +55,11 @@ using namespace std;
 #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
-#include "DelayedPhotonTuplizer/interface/EGammaMvaEleEstimatorCSA14.h"
-#include "DelayedPhotonTuplizer/interface/ElectronMVAEstimatorRun2NonTrig.h"
+#include "Tuplizer/DelayedPhotonTuplizer/interface/EGammaMvaEleEstimatorCSA14.h"
+#include "Tuplizer/DelayedPhotonTuplizer/interface/ElectronMVAEstimatorRun2NonTrig.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
-#include "DelayedPhotonTuplizer/interface/EGammaMvaPhotonEstimator.h"
-#include "DelayedPhotonTuplizer/interface/RazorPDFWeightsHelper.h"
+#include "Tuplizer/DelayedPhotonTuplizer/interface/EGammaMvaPhotonEstimator.h"
+#include "Tuplizer/DelayedPhotonTuplizer/interface/RazorPDFWeightsHelper.h"
 
 //ECAL Rechits
 #include "DataFormats/DetId/interface/DetId.h"

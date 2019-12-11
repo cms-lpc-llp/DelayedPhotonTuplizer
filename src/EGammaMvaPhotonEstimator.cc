@@ -1,5 +1,5 @@
 #include <TFile.h>
-#include "SUSYBSMAnalysis/RazorTuplizer/interface/EGammaMvaPhotonEstimator.h"
+#include "Tuplizer/DelayedPhotonTuplizer/interface/EGammaMvaPhotonEstimator.h"
 #include <cmath>
 #include <vector>
 
