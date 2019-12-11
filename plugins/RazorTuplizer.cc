@@ -2100,15 +2100,22 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
 
             pho_sumWorstVertexChargedHadronPt[nPhotons] = worstIsolation;
 
-            //*****************************************************************
-            //Photon ID MVA variable
-            //*****************************************************************
-            pho_cutBasedID_loose[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-loose");
-            pho_cutBasedID_medium[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-medium");
-            pho_cutBasedID_tight[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-tight");
+            //************************************************************************
+            //Photon ID MVA variable. Some event might not have this, don't know why
+            //************************************************************************
+            try
+            {
+                pho_cutBasedID_loose[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-loose");
+                pho_cutBasedID_medium[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-medium");
+                pho_cutBasedID_tight[nPhotons] = pho.photonID("cutBasedPhotonID-Fall17-94X-V1-tight");
 
-            pho_mvaValue[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v1Values");
-            pho_mvaCategory[nPhotons] = pho.userInt("PhotonMVAEstimatorRunIIFall17v1Categories");
+                pho_mvaValue[nPhotons] = pho.userFloat("PhotonMVAEstimatorRunIIFall17v1Values");
+                pho_mvaCategory[nPhotons] = pho.userInt("PhotonMVAEstimatorRunIIFall17v1Categories");
+            }
+            catch (...)
+            {
+                std::cout << "No Photon ID / MVA found." << std::endl;
+            }
             //---------------------
             //Use Latest Regression
             //---------------------
