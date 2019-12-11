@@ -12,7 +12,8 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
      #'/store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/RECOSIMstep_94X_mc2017_realistic_v10_ext1-v1/00000/02350E8C-32F4-E711-89CB-02163E0145CA.root'
-     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
+     #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
+     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_PSWeights/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/50000/9447AB9D-0C44-E811-B07A-0025905C9742.root'
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -77,10 +78,10 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     enableEcalRechits = cms.bool(True),                                 
     readGenVertexTime = cms.untracked.bool(False),
     genParticles_t0 = cms.InputTag("genParticles", "t0", ""), 
-    triggerPathNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorHLTPathnames2017.dat"),
-    eleHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorElectronHLTFilterNames2017.dat"),
-    muonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorMuonHLTFilterNames2017.dat"),
-    photonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorPhotonHLTFilterNames2017.dat"),
+    triggerPathNamesFile = cms.string("DelayedPhotonTuplizer/data/RazorHLTPathnames2017.dat"),
+    eleHLTFilterNamesFile = cms.string("DelayedPhotonTuplizer/data/RazorElectronHLTFilterNames2017.dat"),
+    muonHLTFilterNamesFile = cms.string("DelayedPhotonTuplizer/data/RazorMuonHLTFilterNames2017.dat"),
+    photonHLTFilterNamesFile = cms.string("DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames2017.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     
