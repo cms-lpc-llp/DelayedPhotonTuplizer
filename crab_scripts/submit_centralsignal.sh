@@ -1,14 +1,16 @@
 for lambda in 100 150 200 250 300 350 400
 do
-        for ctau in 1 50 100 10000
+        for ctau in 10 200 400 600 800 1000 1200
         do
-                subfile=submit/GMSB_L-${lambda}TeV_Ctau-${ctau}cm_private.py
-                inputDataset=`dasgoclient --query="dataset=/GMSB_L${lambda}TeV*Ctau${ctau}cm_13TeV-pythia8/zhicaiz-crab_CMSSW_9_4_7_GMSB_L${lambda}TeV*Ctau${ctau}cm_MINIAODSIM_CaltechT2_10May2019*/* instance=prod/phys03"`
+                subfile=submit/GMSB_L-${lambda}TeV_Ctau-${ctau}cm_central.py
+                query_="dasgoclient --query=\"dataset=/GMSB_L-${lambda}TeV*Ctau-${ctau}cm*/RunIIFall17MiniAODv2*/* instance=prod/global\""
+                inputDataset=`eval ${query_}`
+                echo ${inputDataset}
                 echo "from WMCore.Configuration import Configuration" > ${subfile}
                 echo "config = Configuration()" >> ${subfile}
                 echo "" >> ${subfile}
                 echo "config.section_(\"General\")" >> ${subfile}
-                echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler_MC2017_GMSB_L${lambda}TeV_Ctau-${ctau}cm_10May2019_private'" >> ${subfile} 
+                echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler_MC2017_GMSB_L${lambda}TeV_Ctau-${ctau}cm_central'" >> ${subfile} 
                 echo "config.General.workArea = 'crab'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"JobType\")" >> ${subfile} 
@@ -24,8 +26,7 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.inputDBS = 'phys03'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC/MC2017PrivateGMSB/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC/MC2017CentralGMSB/'" >> ${subfile} 
                 #crab submit -c ${subfile} 
         done
 done
