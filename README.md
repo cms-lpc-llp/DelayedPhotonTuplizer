@@ -1,4 +1,4 @@
-SUSYBSMAnalysis-RazorTuplizer
+Delayed Photon Ntuplizer
 =============================
 
 Razor ntuplizer for running over LHC Run 2 miniAOD compatible with CMSSW_9_4_9.
