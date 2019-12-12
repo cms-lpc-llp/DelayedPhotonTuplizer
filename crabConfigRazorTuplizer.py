@@ -7,7 +7,7 @@ config.General.workArea = 'crab'
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'python/razorTuplizer.py'
+config.JobType.psetName = 'python/razorTuplizer_MC_Fall17_EcalRechits_reMiniAOD_OOT.py'
 config.JobType.outputFiles = ['razorNtuple.root']
 
 config.section_("Data")
