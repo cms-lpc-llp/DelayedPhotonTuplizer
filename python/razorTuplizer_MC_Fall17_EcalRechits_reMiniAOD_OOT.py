@@ -12,8 +12,8 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
      #'/store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/RECOSIMstep_94X_mc2017_realistic_v10_ext1-v1/00000/02350E8C-32F4-E711-89CB-02163E0145CA.root'
-     #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
-     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_PSWeights/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/50000/9447AB9D-0C44-E811-B07A-0025905C9742.root'
+     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
+     #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_PSWeights/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/50000/9447AB9D-0C44-E811-B07A-0025905C9742.root'
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -67,7 +67,8 @@ for idmod in my_id_modules:
 
 
 #------ Analyzer ------#
-
+from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
+process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 #list input collections
 process.ntuples = cms.EDAnalyzer('RazorTuplizer', 
@@ -84,6 +85,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     photonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames2017.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    tracks = cms.InputTag("unpackedTracksAndVertices"),
     
     muons = cms.InputTag("slimmedMuons"),
     electrons = cms.InputTag("slimmedElectrons"),
@@ -157,7 +159,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
     mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
     mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
-    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories")
+    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
 )
 
 #run
@@ -165,4 +167,5 @@ process.p = cms.Path( process.egmGsfElectronIDSequence *
                       #process.HBHENoiseFilterResultProducer*
                       process.BadChargedCandidateFilter*
                       process.BadPFMuonFilter*
+                      process.unpackedTracksAndVertices *
                       process.ntuples)

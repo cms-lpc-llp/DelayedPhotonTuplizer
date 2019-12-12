@@ -21,7 +21,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 #TFileService for output 
 process.TFileService = cms.Service("TFileService", 
     fileName = cms.string("razorNtuple.root"),
-    closeFileFast = cms.untracked.bool(True)
+    closeFileFast = cms.untracked.bool(True),
 )
 
 #load run conditions
@@ -64,6 +64,8 @@ for idmod in my_id_modules:
 
 
 #------ Analyzer ------#
+from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
+process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 #list input collections
 process.ntuples = cms.EDAnalyzer('RazorTuplizer', 
@@ -79,7 +81,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     photonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames2017.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    
+    tracks = cms.InputTag("unpackedTracksAndVertices"),
     muons = cms.InputTag("slimmedMuons"),
     electrons = cms.InputTag("slimmedElectrons"),
     taus = cms.InputTag("slimmedTaus"),
@@ -141,11 +143,12 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
     mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
     mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
-    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories")
+    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
 )
 
 #run
 process.p = cms.Path( process.egmGsfElectronIDSequence *
                       process.BadChargedCandidateFilter*
                       process.BadPFMuonFilter*
+                      process.unpackedTracksAndVertices *
                       process.ntuples)

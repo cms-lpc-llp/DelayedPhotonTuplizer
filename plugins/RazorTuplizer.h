@@ -215,6 +215,7 @@ protected:
 
   //EDM tokens for each miniAOD input object
   edm::EDGetTokenT<reco::VertexCollection> verticesToken_;
+  edm::EDGetTokenT<reco::TrackCollection> tracksToken_;
   edm::EDGetTokenT<float> genParticles_t0_Token_;
   edm::EDGetTokenT<pat::MuonCollection> muonsToken_;
   edm::EDGetTokenT<edm::View<reco::GsfElectron> > electronsToken_;
@@ -287,6 +288,7 @@ protected:
   edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
   edm::Handle<edm::TriggerResults> metFilterBits;
   edm::Handle<reco::VertexCollection> vertices;
+  edm::Handle<reco::TrackCollection> tracks;
   edm::Handle<float> genParticles_t0;
   edm::Handle<pat::PackedCandidateCollection> packedPFCands;
   edm::Handle<pat::MuonCollection> muons;
@@ -546,6 +548,7 @@ protected:
   bool pho_cutBasedID_tight[OBJECTARRAYSIZE];
   float pho_mvaValue[OBJECTARRAYSIZE];
   int pho_mvaCategory[OBJECTARRAYSIZE];
+  bool pho_trackMatching[OBJECTARRAYSIZE];
   vector<vector<uint> > pho_EcalRechitID;
   vector<vector<uint> > *pho_EcalRechitIndex;
   vector<uint>  pho_SeedRechitID;

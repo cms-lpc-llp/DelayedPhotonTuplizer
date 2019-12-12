@@ -22,6 +22,7 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
   muonHLTFilterNamesFile_(iConfig.getParameter<string> ("muonHLTFilterNamesFile")),
   photonHLTFilterNamesFile_(iConfig.getParameter<string> ("photonHLTFilterNamesFile")),
   verticesToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
+  tracksToken_(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"))),
   muonsToken_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"))),
   electronsToken_(consumes<edm::View<reco::GsfElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))),
   tausToken_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("taus"))),
@@ -539,6 +540,7 @@ void RazorTuplizer::enablePhotonBranches(){
   RazorEvents->Branch("pho_cutBasedID_tight", pho_cutBasedID_tight, "pho_cutBasedID_tight[nPhotons]/O");
   RazorEvents->Branch("pho_mvaValue", pho_mvaValue, "pho_mvaValue[nPhotons]/F");
   RazorEvents->Branch("pho_mvaCategory", pho_mvaCategory, "pho_mvaValueCategory[nPhotons]/I");
+  RazorEvents->Branch("pho_trackMatching", pho_trackMatching, "pho_trackMatching[nPhotons]/O");
   if (enableEcalRechits_) {
     pho_EcalRechitIndex = new std::vector<std::vector<uint> >; pho_EcalRechitIndex->clear();
     RazorEvents->Branch("pho_EcalRechitIndex", "std::vector<std::vector<uint> >",&pho_EcalRechitIndex);
@@ -779,6 +781,7 @@ void RazorTuplizer::loadEvent(const edm::Event& iEvent){
   iEvent.getByToken(triggerPrescalesToken_, triggerPrescales);
   iEvent.getByToken(metFilterBitsToken_, metFilterBits);
   iEvent.getByToken(verticesToken_, vertices);
+  iEvent.getByToken(tracksToken_, tracks);
   iEvent.getByToken(packedPFCandsToken_, packedPFCands);
   iEvent.getByToken(muonsToken_, muons);
   iEvent.getByToken(electronsToken_, electrons);
@@ -1048,6 +1051,7 @@ void RazorTuplizer::resetBranches(){
         pho_cutBasedID_tight[i] = false;
         pho_mvaValue[i] = -99.0;
         pho_mvaCategory[i] = -99;
+        pho_trackMatching[i] = false;
 
         //Jet
         jetE[i] = 0.0;
@@ -2116,6 +2120,19 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
             {
                 std::cout << "No Photon ID / MVA found." << std::endl;
             }
+
+            //**************************************************************************
+            //Veto photons that overlap with tracks
+            //**************************************************************************
+            bool closeToTrack = false;
+            for (const auto & track : *tracks)
+            {
+                if (track.pt() < 5) continue;
+                if (reco::deltaR(pho, track) < 0.2) closeToTrack = true;
+            }
+            pho_trackMatching[nPhotons] = closeToTrack;
+
+
             //---------------------
             //Use Latest Regression
             //---------------------
@@ -2334,7 +2351,6 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
     delete lazyToolnoZS;
     return true;
 };
-
 
 bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSetup& iSetup){  
 
