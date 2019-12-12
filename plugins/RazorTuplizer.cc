@@ -86,6 +86,7 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
   {
    	v_photonsToken_.push_back(consumes<pat::PhotonCollection>(v_photonsInputTag[i]));
   }
+
   //declare the TFileService for output
   edm::Service<TFileService> fs;
   
@@ -316,21 +317,24 @@ void RazorTuplizer::setBranches(){
   
   if (enableTriggerInfo_) enableTriggerBranches();
   if (enableEcalRechits_) enableEcalRechitBranches();
-  enableMCBranches();
-  enableGenParticleBranches();
+  if (useGen_)
+  {
+      enableMCBranches();
+      enableGenParticleBranches();
+  } 
 }
 
 void RazorTuplizer::enableEventInfoBranches(){
-  RazorEvents->Branch("isData", &isData, "isData/O");
-  RazorEvents->Branch("nPV", &nPV, "nPV/I");
-  RazorEvents->Branch("runNum", &runNum, "runNum/i");
-  RazorEvents->Branch("nSlimmedSecondV", &nSlimmedSecondV, "nSlimmedSecondV/i");
-  RazorEvents->Branch("lumiNum", &lumiNum, "lumiNum/i");
-  RazorEvents->Branch("eventNum", &eventNum, "eventNum/i");
-  RazorEvents->Branch("eventTime", &eventTime, "eventTime/i");
-  RazorEvents->Branch("pvX", &pvX, "pvX/F");
-  RazorEvents->Branch("pvY", &pvY, "pvY/F");
-  RazorEvents->Branch("pvZ", &pvZ, "pvZ/F");
+    RazorEvents->Branch("isData", &isData, "isData/O");
+    RazorEvents->Branch("nPV", &nPV, "nPV/I");
+    RazorEvents->Branch("runNum", &runNum, "runNum/i");
+    RazorEvents->Branch("nSlimmedSecondV", &nSlimmedSecondV, "nSlimmedSecondV/i");
+    RazorEvents->Branch("lumiNum", &lumiNum, "lumiNum/i");
+    RazorEvents->Branch("eventNum", &eventNum, "eventNum/i");
+    RazorEvents->Branch("eventTime", &eventTime, "eventTime/i");
+    RazorEvents->Branch("pvX", &pvX, "pvX/F");
+    RazorEvents->Branch("pvY", &pvY, "pvY/F");
+    RazorEvents->Branch("pvZ", &pvZ, "pvZ/F");
   RazorEvents->Branch("fixedGridRhoAll", &fixedGridRhoAll, "fixedGridRhoAll/F");
   RazorEvents->Branch("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll, "fixedGridRhoFastjetAll/F");
   RazorEvents->Branch("fixedGridRhoFastjetAllCalo", &fixedGridRhoFastjetAllCalo, "fixedGridRhoFastjetAllCalo/F");
@@ -743,9 +747,6 @@ void RazorTuplizer::enableMCBranches(){
   RazorEvents->Branch("genQScale", &genQScale, "genQScale/F");
   RazorEvents->Branch("genAlphaQCD", &genAlphaQCD, "genAlphaQCD/F");
   RazorEvents->Branch("genAlphaQED", &genAlphaQED, "genAlphaQED/F");
-  scaleWeights = new std::vector<float>; scaleWeights->clear();
-  pdfWeights = new std::vector<float>; pdfWeights->clear();
-  alphasWeights = new std::vector<float>; alphasWeights->clear();
   if (isFastsim_) {
     RazorEvents->Branch("lheComments", "std::string",&lheComments);
   }
@@ -1137,25 +1138,28 @@ void RazorTuplizer::resetBranches(){
       ecalRechit_GainSwitch6->clear();
       ecalRechit_transpCorr->clear();
     }
+    
+    if (useGen_) 
+    {
+        for(int i = 0; i < GENPARTICLEARRAYSIZE; i++){
+            //Gen Particle
+            gParticleMotherId[i] = -99999;
+            gParticleMotherIndex[i] = -99999;
+            gParticleId[i] = -99999;
+            gParticleStatus[i] = -99999;
+            gParticleE[i] = -99999.0;
+            gParticlePt[i] = -99999.0;
+            gParticlePx[i] = -99999.0;
+            gParticlePy[i] = -99999.0;
+            gParticlePz[i] = -99999.0;
+            gParticleEta[i] = -99999.0;
+            gParticlePhi[i] = -99999.0;
 
-    for(int i = 0; i < GENPARTICLEARRAYSIZE; i++){
-        //Gen Particle
-        gParticleMotherId[i] = -99999;
-        gParticleMotherIndex[i] = -99999;
-        gParticleId[i] = -99999;
-        gParticleStatus[i] = -99999;
-        gParticleE[i] = -99999.0;
-        gParticlePt[i] = -99999.0;
-        gParticlePx[i] = -99999.0;
-        gParticlePy[i] = -99999.0;
-        gParticlePz[i] = -99999.0;
-        gParticleEta[i] = -99999.0;
-        gParticlePhi[i] = -99999.0;
+            gParticleDecayVertexX[i] = -99999.0;
+            gParticleDecayVertexY[i] = -99999.0;
+            gParticleDecayVertexZ[i] = -99999.0;
 
-        gParticleDecayVertexX[i] = -99999.0;
-        gParticleDecayVertexY[i] = -99999.0;
-        gParticleDecayVertexZ[i] = -99999.0;
-
+        }
     }
 
     //MET
@@ -1246,21 +1250,23 @@ void RazorTuplizer::resetBranches(){
     metType1PhiJetResDownSmear=-999.;
     metType1PhiMETFullUncertaintySize=-999.;
 
-    genMetPt = -999;
-    genMetPhi = -999;
-    genVertexX = -999;
-    genVertexY = -999;
-    genVertexZ = -999;
-    genVertexT = -999;
-    genWeight = 1;
-    genSignalProcessID = -999;
-    genQScale = -999;
-    genAlphaQCD = -999;
-    genAlphaQED = -999;
-    scaleWeights->clear();
-    pdfWeights->clear();
-    alphasWeights->clear();
-
+    if (useGen_)
+    {
+        genMetPt = -999;
+        genMetPhi = -999;
+        genVertexX = -999;
+        genVertexY = -999;
+        genVertexZ = -999;
+        genVertexT = -999;
+        genWeight = 1;
+        genSignalProcessID = -999;
+        genQScale = -999;
+        genAlphaQCD = -999;
+        genAlphaQED = -999;
+        scaleWeights->clear();
+        pdfWeights->clear();
+        alphasWeights->clear();
+    }
     HLTMR = -999;
     HLTRSQ = -999;
 
