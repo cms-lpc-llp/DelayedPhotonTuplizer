@@ -25,6 +25,7 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
   tracksToken_(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"))),
   muonsToken_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"))),
   electronsToken_(consumes<edm::View<reco::GsfElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))),
+  //electronsToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"))),
   tausToken_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("taus"))),
   //photonsToken_(consumes<pat::PhotonCollection>(iConfig.getParameter<edm::VInputTag>("photons"))),
   v_photonsInputTag(iConfig.getParameter<std::vector<edm::InputTag>>("photons")),
@@ -440,6 +441,11 @@ void RazorTuplizer::enableElectronBranches(){
   RazorEvents->Branch("ele_passTPOneProbeFilter", ele_passTPOneProbeFilter, "ele_passTPOneProbeFilter[nElectrons]/O");
   RazorEvents->Branch("ele_passTPTwoProbeFilter", ele_passTPTwoProbeFilter, "ele_passTPTwoProbeFilter[nElectrons]/O");
   RazorEvents->Branch("ele_passHLTFilter", &ele_passHLTFilter, Form("ele_passHLTFilter[nElectrons][%d]/O",MAX_ElectronHLTFilters));
+  RazorEvents->Branch("ele_cutBasedID_loose", ele_cutBasedID_loose, "ele_cutBasedID_loose[nElectrons]/O");
+  RazorEvents->Branch("ele_cutBasedID_medium", ele_cutBasedID_medium, "ele_cutBasedID_medium[nElectrons]/O");
+  RazorEvents->Branch("ele_cutBasedID_tight", ele_cutBasedID_tight, "ele_cutBasedID_tight[nElectrons]/O");
+  RazorEvents->Branch("ele_mvaValue", ele_mvaValue, "ele_mvaValue[nElectrons]/F");
+  RazorEvents->Branch("ele_mvaCategory", ele_mvaCategory, "ele_mvaValueCategory[nElectrons]/I");
   if (enableEcalRechits_) {
     ele_EcalRechitIndex = new std::vector<std::vector<uint> >; ele_EcalRechitIndex->clear();
     RazorEvents->Branch("ele_EcalRechitIndex", "std::vector<std::vector<uint> >",&ele_EcalRechitIndex);
@@ -956,6 +962,11 @@ void RazorTuplizer::resetBranches(){
         ele_passTPTwoTagFilter[i] = false;
         ele_passTPOneProbeFilter[i] = false;
         ele_passTPTwoProbeFilter[i] = false;
+        ele_cutBasedID_loose[i] = false;
+        ele_cutBasedID_medium[i] = false;
+        ele_cutBasedID_tight[i] = false;
+        ele_mvaValue[i] = -99.0;
+        ele_mvaCategory[i] = -99;
         for (int q=0;q<MAX_ElectronHLTFilters;q++) ele_passHLTFilter[i][q] = false;
 
         //Tau
@@ -1506,134 +1517,150 @@ bool RazorTuplizer::fillElectrons(const edm::Event& iEvent){
   iEvent.getByToken(mvaHZZValuesMapToken_,mvaHZZValues);
   iEvent.getByToken(mvaHZZCategoriesMapToken_,mvaHZZCategories);
 
-  // for(const pat::Electron &ele : *electrons){
-  for (size_t i = 0; i < electrons->size(); ++i){
-    const auto ele = electrons->ptrAt(i);
+  //for(const pat::Electron &ele : *electrons)
+  for (size_t i = 0; i < electrons->size(); ++i)
+  {
+      const auto ele = electrons->ptrAt(i);
 
-    if(ele->pt() < 5) continue;
-    eleE[nElectrons] = ele->energy();
-    elePt[nElectrons] = ele->pt();
-    eleEta[nElectrons] = ele->eta();
-    elePhi[nElectrons] = ele->phi();
-    eleCharge[nElectrons] = ele->charge();
-    eleE_SC[nElectrons] = ele->superCluster()->energy();
-    eleEta_SC[nElectrons] = ele->superCluster()->eta();
-    elePhi_SC[nElectrons] = ele->superCluster()->phi();
-    eleSigmaIetaIeta[nElectrons] = ele->sigmaIetaIeta();
-    eleFull5x5SigmaIetaIeta[nElectrons] = ele->full5x5_sigmaIetaIeta();
-    eleR9[nElectrons] = ele->r9();
-    ele_dEta[nElectrons] = ele->deltaEtaSuperClusterTrackAtVtx() - ele->superCluster()->eta() + ele->superCluster()->seed()->eta();
-    ele_dPhi[nElectrons] = ele->deltaPhiSuperClusterTrackAtVtx();
-    ele_HoverE[nElectrons] = ele->hcalOverEcal();
-    ele_d0[nElectrons] = -ele->gsfTrack().get()->dxy(myPV->position());
-    ele_dZ[nElectrons] = ele->gsfTrack().get()->dz(myPV->position());
-    ele_ip3d[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->dB(pat::Electron::PV3D);
-    ele_ip3dSignificance[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->dB(pat::Electron::PV3D)/((edm::Ptr<pat::Electron>)(ele))->edB(pat::Electron::PV3D);   
-    ele_pileupIso[nElectrons] = ele->pfIsolationVariables().sumPUPt;
-    ele_chargedIso[nElectrons] = ele->pfIsolationVariables().sumChargedHadronPt;
-    ele_photonIso[nElectrons] = ele->pfIsolationVariables().sumPhotonEt;
-    ele_neutralHadIso[nElectrons] = ele->pfIsolationVariables().sumNeutralHadronEt;
-    ele_MissHits[nElectrons] = ele->gsfTrack()->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
+      if(ele->pt() < 5) continue;
+      eleE[nElectrons] = ele->energy();
+      elePt[nElectrons] = ele->pt();
+      eleEta[nElectrons] = ele->eta();
+      elePhi[nElectrons] = ele->phi();
+      eleCharge[nElectrons] = ele->charge();
+      eleE_SC[nElectrons] = ele->superCluster()->energy();
+      eleEta_SC[nElectrons] = ele->superCluster()->eta();
+      elePhi_SC[nElectrons] = ele->superCluster()->phi();
+      eleSigmaIetaIeta[nElectrons] = ele->sigmaIetaIeta();
+      eleFull5x5SigmaIetaIeta[nElectrons] = ele->full5x5_sigmaIetaIeta();
+      eleR9[nElectrons] = ele->r9();
+      ele_dEta[nElectrons] = ele->deltaEtaSuperClusterTrackAtVtx() - ele->superCluster()->eta() + ele->superCluster()->seed()->eta();
+      ele_dPhi[nElectrons] = ele->deltaPhiSuperClusterTrackAtVtx();
+      ele_HoverE[nElectrons] = ele->hcalOverEcal();
+      ele_d0[nElectrons] = -ele->gsfTrack().get()->dxy(myPV->position());
+      ele_dZ[nElectrons] = ele->gsfTrack().get()->dz(myPV->position());
+      ele_ip3d[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->dB(pat::Electron::PV3D);
+      ele_ip3dSignificance[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->dB(pat::Electron::PV3D)/((edm::Ptr<pat::Electron>)(ele))->edB(pat::Electron::PV3D);   
+      ele_pileupIso[nElectrons] = ele->pfIsolationVariables().sumPUPt;
+      ele_chargedIso[nElectrons] = ele->pfIsolationVariables().sumChargedHadronPt;
+      ele_photonIso[nElectrons] = ele->pfIsolationVariables().sumPhotonEt;
+      ele_neutralHadIso[nElectrons] = ele->pfIsolationVariables().sumNeutralHadronEt;
+      ele_MissHits[nElectrons] = ele->gsfTrack()->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
 
-    //*************************************************
-    //Conversion Veto
-    //*************************************************
-    ele_PassConvVeto[nElectrons] = false;
-    if( beamSpot.isValid() && conversions.isValid() ) {
-      ele_PassConvVeto[nElectrons] = !ConversionTools::hasMatchedConversion(*ele,conversions,
-    									    beamSpot->position());
-    } else {
-      cout << "\n\nERROR!!! conversions not found!!!\n";
-    }
-  
-    // 1/E - 1/P
-    if( ele->ecalEnergy() == 0 ){
-      ele_OneOverEminusOneOverP[nElectrons] = 1e30;
-    } else if( !std::isfinite(ele->ecalEnergy())){
-      ele_OneOverEminusOneOverP[nElectrons] = 1e30;
-    } else {
-    ele_OneOverEminusOneOverP[nElectrons] = 1./ele->ecalEnergy()  -  ele->eSuperClusterOverP()/ele->ecalEnergy();    
-    }
-
-    //*************************************************
-    //ID MVA
-    //*************************************************
-    ele_IDMVAGeneralPurpose[nElectrons] = (*mvaGeneralPurposeValues)[ele];
-    ele_IDMVACategoryGeneralPurpose[nElectrons] = (*mvaGeneralPurposeCategories)[ele];
-    ele_IDMVAHZZ[nElectrons] = (*mvaHZZValues)[ele];
-    ele_IDMVACategoryHZZ[nElectrons] = (*mvaHZZCategories)[ele];
-
-
-    ele_RegressionE[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->ecalRegressionEnergy();
-    ele_CombineP4[nElectrons]   = ((edm::Ptr<pat::Electron>)(ele))->ecalTrackRegressionEnergy();
-
-    ele_ptrel[nElectrons]   = getLeptonPtRel( jets, &(*ele) );
-    tuple<double,double,double> PFMiniIso = getPFMiniIsolation(packedPFCands, dynamic_cast<const reco::Candidate *>(&(*ele)), 0.05, 0.2, 10., false, false);
-    ele_chargedMiniIso[nElectrons] = std::get<0>(PFMiniIso);
-    ele_photonAndNeutralHadronMiniIso[nElectrons] = std::get<1>(PFMiniIso);
-    ele_chargedPileupMiniIso[nElectrons] = std::get<2>(PFMiniIso);
-    ele_activityMiniIsoAnnulus[nElectrons] = ActivityPFMiniIsolationAnnulus( packedPFCands, dynamic_cast<const reco::Candidate *>(&(*ele)), 0.4, 0.05, 0.2, 10.);
-
-    //*************************************************
-    //Trigger Object Matching
-    //*************************************************
-    bool passSingleEleTagFilter = false;
-    bool passTPOneTagFilter= false;
-    bool passTPTwoTagFilter= false;
-    bool passTPOneProbeFilter= false;
-    bool passTPTwoProbeFilter= false;
-    for (pat::TriggerObjectStandAlone trigObject : *triggerObjects) {
-      if (deltaR(trigObject.eta(), trigObject.phi(),ele->eta(),ele->phi()) > 0.3) continue;
-      trigObject.unpackFilterLabels(iEvent, *triggerBits); 
-
-      //check Single ele filters
-      if (trigObject.hasFilterLabel("hltEle23WPLooseGsfTrackIsoFilter")  ||
-    	  trigObject.hasFilterLabel("hltEle27WPLooseGsfTrackIsoFilter")  ||
-    	  trigObject.hasFilterLabel("hltEle27WPTightGsfTrackIsoFilter")  ||
-    	  trigObject.hasFilterLabel("hltEle32WPLooseGsfTrackIsoFilter")  ||
-    	  trigObject.hasFilterLabel("hltEle32WPTightGsfTrackIsoFilter")
-    	  ) {
-    	passSingleEleTagFilter = true;
-      }
-      
-      //check Tag and Probe Filters
-      if (trigObject.hasFilterLabel("hltEle25WP60Ele8TrackIsoFilter")) passTPOneTagFilter = true;
-      if (trigObject.hasFilterLabel("hltEle25WP60SC4TrackIsoFilter")) passTPTwoTagFilter = true;
-      if (trigObject.hasFilterLabel("hltEle25WP60Ele8Mass55Filter")) passTPOneProbeFilter = true;
-      if (trigObject.hasFilterLabel("hltEle25WP60SC4Mass55Filter")) passTPTwoProbeFilter = true;
-
-      //check all filters
-      for ( int q=0; q<MAX_ElectronHLTFilters;q++) {
-    	if (trigObject.hasFilterLabel(eleHLTFilterNames[q].c_str())) ele_passHLTFilter[nElectrons][q] = true;
-      }
-
-    }
-  
-    ele_passSingleEleTagFilter[nElectrons] = passSingleEleTagFilter;
-    ele_passTPOneTagFilter[nElectrons] = passTPOneTagFilter;
-    ele_passTPTwoTagFilter[nElectrons] = passTPTwoTagFilter;
-    ele_passTPOneProbeFilter[nElectrons] = passTPOneProbeFilter;
-    ele_passTPTwoProbeFilter[nElectrons] = passTPTwoProbeFilter;
-
-    if (enableEcalRechits_) {
-      ele_SeedRechitID.push_back(ele->superCluster()->seed()->seed().rawId());
-      
       //*************************************************
-      //Find relevant rechits
+      //Conversion Veto
       //*************************************************
-      std::vector<uint> rechits; rechits.clear();
-      const std::vector< std::pair<DetId, float>>& v_id =ele->superCluster()->seed()->hitsAndFractions();
-      for ( size_t i = 0; i < v_id.size(); ++i ) {
-	ecalRechitID_ToBeSaved.push_back(v_id[i].first);
-	rechits.push_back(v_id[i].first.rawId());
+      ele_PassConvVeto[nElectrons] = false;
+      if( beamSpot.isValid() && conversions.isValid() ) {
+          ele_PassConvVeto[nElectrons] = !ConversionTools::hasMatchedConversion(*ele,conversions,
+                  beamSpot->position());
+      } else {
+          cout << "\n\nERROR!!! conversions not found!!!\n";
       }
-      ecalRechitEtaPhi_ToBeSaved.push_back( pair<double,double>( ele->superCluster()->eta(), ele->superCluster()->phi() ));
-      ele_EcalRechitID.push_back(rechits);
-    }
 
-    nElectrons++;
+      // 1/E - 1/P
+      if( ele->ecalEnergy() == 0 ){
+          ele_OneOverEminusOneOverP[nElectrons] = 1e30;
+      } else if( !std::isfinite(ele->ecalEnergy())){
+          ele_OneOverEminusOneOverP[nElectrons] = 1e30;
+      } else {
+          ele_OneOverEminusOneOverP[nElectrons] = 1./ele->ecalEnergy()  -  ele->eSuperClusterOverP()/ele->ecalEnergy();    
+      }
+
+      //*************************************************
+      //ID MVA
+      //*************************************************
+      ele_IDMVAGeneralPurpose[nElectrons] = (*mvaGeneralPurposeValues)[ele];
+      ele_IDMVACategoryGeneralPurpose[nElectrons] = (*mvaGeneralPurposeCategories)[ele];
+      ele_IDMVAHZZ[nElectrons] = (*mvaHZZValues)[ele];
+      ele_IDMVACategoryHZZ[nElectrons] = (*mvaHZZCategories)[ele];
+
+
+      ele_RegressionE[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->ecalRegressionEnergy();
+      ele_CombineP4[nElectrons]   = ((edm::Ptr<pat::Electron>)(ele))->ecalTrackRegressionEnergy();
+
+      ele_ptrel[nElectrons]   = getLeptonPtRel( jets, &(*ele) );
+      tuple<double,double,double> PFMiniIso = getPFMiniIsolation(packedPFCands, dynamic_cast<const reco::Candidate *>(&(*ele)), 0.05, 0.2, 10., false, false);
+      ele_chargedMiniIso[nElectrons] = std::get<0>(PFMiniIso);
+      ele_photonAndNeutralHadronMiniIso[nElectrons] = std::get<1>(PFMiniIso);
+      ele_chargedPileupMiniIso[nElectrons] = std::get<2>(PFMiniIso);
+      ele_activityMiniIsoAnnulus[nElectrons] = ActivityPFMiniIsolationAnnulus( packedPFCands, dynamic_cast<const reco::Candidate *>(&(*ele)), 0.4, 0.05, 0.2, 10.);
+
+      try
+      {
+          ele_cutBasedID_loose[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->electronID("cutBasedElectronID-Fall17-94X-V1-loose");
+          ele_cutBasedID_medium[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->electronID("cutBasedElectronID-Fall17-94X-V1-medium");
+          ele_cutBasedID_tight[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->electronID("cutBasedElectronID-Fall17-94X-V1-tight");
+
+          ele_mvaValue[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->userFloat("ElectronMVAEstimatorRun2Fall17IsoV1Values");
+          ele_mvaCategory[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->userInt("ElectronMVAEstimatorRun2Fall17IsoV1Categories");
+      }
+      catch (...)
+      {
+          std::cout << "No Electron ID / MVA found." << std::endl;
+      }
+
+
+      //*************************************************
+      //Trigger Object Matching
+      //*************************************************
+      bool passSingleEleTagFilter = false;
+      bool passTPOneTagFilter= false;
+      bool passTPTwoTagFilter= false;
+      bool passTPOneProbeFilter= false;
+      bool passTPTwoProbeFilter= false;
+      for (pat::TriggerObjectStandAlone trigObject : *triggerObjects) {
+          if (deltaR(trigObject.eta(), trigObject.phi(),ele->eta(),ele->phi()) > 0.3) continue;
+          trigObject.unpackFilterLabels(iEvent, *triggerBits); 
+
+          //check Single ele filters
+          if (trigObject.hasFilterLabel("hltEle23WPLooseGsfTrackIsoFilter")  ||
+                  trigObject.hasFilterLabel("hltEle27WPLooseGsfTrackIsoFilter")  ||
+                  trigObject.hasFilterLabel("hltEle27WPTightGsfTrackIsoFilter")  ||
+                  trigObject.hasFilterLabel("hltEle32WPLooseGsfTrackIsoFilter")  ||
+                  trigObject.hasFilterLabel("hltEle32WPTightGsfTrackIsoFilter")
+             ) {
+              passSingleEleTagFilter = true;
+          }
+
+          //check Tag and Probe Filters
+          if (trigObject.hasFilterLabel("hltEle25WP60Ele8TrackIsoFilter")) passTPOneTagFilter = true;
+          if (trigObject.hasFilterLabel("hltEle25WP60SC4TrackIsoFilter")) passTPTwoTagFilter = true;
+          if (trigObject.hasFilterLabel("hltEle25WP60Ele8Mass55Filter")) passTPOneProbeFilter = true;
+          if (trigObject.hasFilterLabel("hltEle25WP60SC4Mass55Filter")) passTPTwoProbeFilter = true;
+
+          //check all filters
+          for ( int q=0; q<MAX_ElectronHLTFilters;q++) {
+              if (trigObject.hasFilterLabel(eleHLTFilterNames[q].c_str())) ele_passHLTFilter[nElectrons][q] = true;
+          }
+
+      }
+
+      ele_passSingleEleTagFilter[nElectrons] = passSingleEleTagFilter;
+      ele_passTPOneTagFilter[nElectrons] = passTPOneTagFilter;
+      ele_passTPTwoTagFilter[nElectrons] = passTPTwoTagFilter;
+      ele_passTPOneProbeFilter[nElectrons] = passTPOneProbeFilter;
+      ele_passTPTwoProbeFilter[nElectrons] = passTPTwoProbeFilter;
+
+      if (enableEcalRechits_) {
+          ele_SeedRechitID.push_back(ele->superCluster()->seed()->seed().rawId());
+
+          //*************************************************
+          //Find relevant rechits
+          //*************************************************
+          std::vector<uint> rechits; rechits.clear();
+          const std::vector< std::pair<DetId, float>>& v_id =ele->superCluster()->seed()->hitsAndFractions();
+          for ( size_t i = 0; i < v_id.size(); ++i ) {
+              ecalRechitID_ToBeSaved.push_back(v_id[i].first);
+              rechits.push_back(v_id[i].first.rawId());
+          }
+          ecalRechitEtaPhi_ToBeSaved.push_back( pair<double,double>( ele->superCluster()->eta(), ele->superCluster()->phi() ));
+          ele_EcalRechitID.push_back(rechits);
+      }
+
+      nElectrons++;
   }
-  
+
   return true;
 };
 

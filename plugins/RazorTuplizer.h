@@ -219,6 +219,7 @@ protected:
   edm::EDGetTokenT<float> genParticles_t0_Token_;
   edm::EDGetTokenT<pat::MuonCollection> muonsToken_;
   edm::EDGetTokenT<edm::View<reco::GsfElectron> > electronsToken_;
+  //edm::EDGetTokenT<pat::ElectronCollection> electronsToken_;
   edm::EDGetTokenT<pat::TauCollection> tausToken_;
   std::vector<edm::EDGetTokenT<pat::PhotonCollection>> v_photonsToken_;
   std::vector<edm::InputTag> v_photonsInputTag;
@@ -448,6 +449,11 @@ protected:
   bool ele_passTPOneProbeFilter[OBJECTARRAYSIZE];
   bool ele_passTPTwoProbeFilter[OBJECTARRAYSIZE];  
   bool ele_passHLTFilter[OBJECTARRAYSIZE][MAX_ElectronHLTFilters];
+  bool ele_cutBasedID_loose[OBJECTARRAYSIZE];
+  bool ele_cutBasedID_medium[OBJECTARRAYSIZE];
+  bool ele_cutBasedID_tight[OBJECTARRAYSIZE];
+  float ele_mvaValue[OBJECTARRAYSIZE];
+  int ele_mvaCategory[OBJECTARRAYSIZE];
   vector<vector<uint> > ele_EcalRechitID;
   vector<vector<uint> > *ele_EcalRechitIndex;
   vector<uint> ele_SeedRechitID;
