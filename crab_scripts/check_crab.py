@@ -8,9 +8,12 @@ parser.add_argument("-s","--sample", help='Sample to check')
 parser.add_argument("-r","--resubmit", action='store_true', default=False, help='Whether to resubmit failed jobs even if task is not finished')
 args = parser.parse_args()
 
-to_check = args.sample
+if not args.sample: 
+    to_check = '*'
+else:
+    to_check = '*{}*'.format(args.sample)
 
-tasks = glob.glob("crab/*{}*".format(to_check))
+tasks = glob.glob("crab/{}".format(to_check))
 for task in tasks:
     print("\n*********\n{}".format(task))
     cmd = "crab status -d {}".format(task)
