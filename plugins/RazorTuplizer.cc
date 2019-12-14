@@ -574,7 +574,12 @@ void RazorTuplizer::enableEcalRechitBranches(){
   ecalRechit_GainSwitch1 = new std::vector<bool>; ecalRechit_GainSwitch1->clear();
   ecalRechit_GainSwitch6 = new std::vector<bool>; ecalRechit_GainSwitch6->clear();
   ecalRechit_transpCorr = new std::vector<float>; ecalRechit_transpCorr->clear();
-
+  if (isData_)
+  {
+      ecalRechit_pedrms12 = new std::vector<float>; ecalRechit_pedrms12->clear();
+      ecalRechit_pedrms6 = new std::vector<float>; ecalRechit_pedrms6->clear();
+      ecalRechit_pedrms1 = new std::vector<float>; ecalRechit_pedrms1->clear();
+  }
   RazorEvents->Branch("ecalRechit_Eta", "std::vector<float>",&ecalRechit_Eta);
   RazorEvents->Branch("ecalRechit_Phi", "std::vector<float>",&ecalRechit_Phi);
   RazorEvents->Branch("ecalRechit_X", "std::vector<float>",&ecalRechit_X);
@@ -587,6 +592,12 @@ void RazorTuplizer::enableEcalRechitBranches(){
   RazorEvents->Branch("ecalRechit_GainSwitch1", "std::vector<bool>",&ecalRechit_GainSwitch1);
   RazorEvents->Branch("ecalRechit_GainSwitch6", "std::vector<bool>",&ecalRechit_GainSwitch6);
   RazorEvents->Branch("ecalRechit_transpCorr", "std::vector<float>",&ecalRechit_transpCorr);
+  if (isData_)
+  {
+      RazorEvents->Branch("ecalRechit_pedrms12", "std::vector<float>",&ecalRechit_pedrms12);
+      RazorEvents->Branch("ecalRechit_pedrms6", "std::vector<float>",&ecalRechit_pedrms6);
+      RazorEvents->Branch("ecalRechit_pedrms1", "std::vector<float>",&ecalRechit_pedrms1);
+  }
 
 }
 
@@ -1148,6 +1159,12 @@ void RazorTuplizer::resetBranches(){
       ecalRechit_GainSwitch1->clear();
       ecalRechit_GainSwitch6->clear();
       ecalRechit_transpCorr->clear();
+      if (isData_)
+      {
+          ecalRechit_pedrms12->clear();
+          ecalRechit_pedrms6->clear();
+          ecalRechit_pedrms1->clear();
+      }
     }
     
     if (useGen_) 
@@ -2400,6 +2417,10 @@ bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSe
     edm::ESHandle<EcalLaserDbService> laser_;
     iSetup.get<EcalLaserDbRecord>().get(laser_);
 
+    //ECAL Pedestal
+    edm::ESHandle<EcalPedestals> pedestalsH;
+    iSetup.get<EcalPedestalsRcd>().get(pedestalsH);
+
     //Barrel Rechits
     for (EcalRecHitCollection::const_iterator recHit = ebRecHits->begin(); recHit != ebRecHits->end(); ++recHit) {
         // first get detector id
@@ -2453,6 +2474,20 @@ bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSe
         ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
         ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
         ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
+
+        // pedestal info
+        if (isData_)
+        {
+            const auto &pediter = pedestalsH->find(recHitId);
+            if (pediter != pedestalsH->end())
+            {
+                const auto & ped = (*pediter);
+
+                ecalRechit_pedrms12->push_back(ped.rms(1));
+                ecalRechit_pedrms6->push_back(ped.rms(2));
+                ecalRechit_pedrms1->push_back(ped.rms(3));
+            }
+        }
         rechitIndex++;
     }
 
@@ -2506,7 +2541,21 @@ bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSe
         ecalRechit_FlagOOT->push_back(recHit->checkFlag(EcalRecHit::kOutOfTime));
         ecalRechit_GainSwitch1->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain1));
         ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
-        ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
+        ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));
+
+        if (isData_)
+        {
+            // pedestal info
+            const auto &pediter = pedestalsH->find(recHitId);
+            if (pediter != pedestalsH->end())
+            {
+                const auto & ped = (*pediter);
+
+                ecalRechit_pedrms12->push_back(ped.rms(1));
+                ecalRechit_pedrms6->push_back(ped.rms(2));
+                ecalRechit_pedrms1->push_back(ped.rms(3));
+            }
+        }
         rechitIndex++;
 
     }

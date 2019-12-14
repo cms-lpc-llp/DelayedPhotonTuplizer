@@ -68,6 +68,9 @@ using namespace std;
 #include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+// ECAL Record info (Pedestals)
+#include "CondFormats/EcalObjects/interface/EcalPedestals.h"
+#include "CondFormats/DataRecord/interface/EcalPedestalsRcd.h"
 
 //ECAL tools
 #include "RecoEcal/EgammaCoreTools/interface/EcalTools.h"
@@ -576,6 +579,9 @@ protected:
   vector<bool> *ecalRechit_GainSwitch1;
   vector<bool> *ecalRechit_GainSwitch6;
   vector<float> *ecalRechit_transpCorr;
+  vector<float> *ecalRechit_pedrms12;
+  vector<float> *ecalRechit_pedrms6;
+  vector<float> *ecalRechit_pedrms1;
 
   //AK4 Jets
   int nJets;
