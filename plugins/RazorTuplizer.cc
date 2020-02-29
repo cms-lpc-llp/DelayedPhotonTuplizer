@@ -3080,24 +3080,24 @@ bool RazorTuplizer::fillTrigger(const edm::Event& iEvent){
   //fill trigger information
 
   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-  // std::cout << "\n === TRIGGER PATHS === " << std::endl;
-
-  //********************************************************************
-  //Option to save all HLT path names in the ntuple per event
-  //Expensive option in terms of ntuple size
-  //********************************************************************
-  // for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
-  //   string hltPathNameReq = "HLT_";   
-  //   if (triggerBits->accept(i)) 
-  //     if ((names.triggerName(i)).find(hltPathNameReq) != string::npos) 
-  // 	nameHLT->push_back(names.triggerName(i));
-
-  //   std::cout << "Trigger " << names.triggerName(i) << 
-  //     ", prescale " << triggerPrescales->getPrescaleForIndex(i) <<
-  //     ": " << (triggerBits->accept(i) ? "PASS" : "fail (or not run)") 
-  //   	      << std::endl;
-  // }
-
+//   std::cout << "\n === TRIGGER PATHS === " << std::endl;
+//
+//  //********************************************************************
+//  //Option to save all HLT path names in the ntuple per event
+//  //Expensive option in terms of ntuple size
+//  //********************************************************************
+//   for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
+//     string hltPathNameReq = "HLT_";   
+//     if (triggerBits->accept(i)) 
+//       if ((names.triggerName(i)).find(hltPathNameReq) != string::npos) 
+//   	nameHLT->push_back(names.triggerName(i));
+//
+//     std::cout << "Trigger " << names.triggerName(i) << 
+//       ", prescale " << triggerPrescales->getPrescaleForIndex(i) <<
+//       ": " << (triggerBits->accept(i) ? "PASS" : "fail (or not run)") 
+//     	      << std::endl;
+//   }
+//
   //********************************************************************
   // Save trigger decisions in array of booleans
   //********************************************************************
