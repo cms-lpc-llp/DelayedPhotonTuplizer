@@ -12,7 +12,7 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         #'/store/data/Run2017B/DoubleEG/MINIAOD/17Nov2017-v1/20000/065312BE-A3D5-E711-A0C7-0CC47A1E0DCC.root'
-        '/store/data/Run2017F/DoubleEG/MINIAOD/31Mar2018-v1/00000/005DCBA4-6137-E811-964C-0025904C67BA.root'
+        '/store/data/Run2017B/SinglePhoton/MINIAOD/31Mar2018-v1/90000/42B77076-8F37-E811-9C16-0CC47A78A414.root'
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
