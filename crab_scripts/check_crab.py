@@ -27,6 +27,7 @@ for task in tasks:
     lines = stdout.split('\n')
     isFailed = False
     isCompleted = False
+    beginPrint = 0
     endPrint = None
     for i, line in enumerate(lines):
         if "Status on the scheduler" in line:
