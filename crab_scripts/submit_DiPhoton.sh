@@ -30,8 +30,7 @@ do
                 echo "config.section_(\"Data\")" >> ${subfile} 
                 echo "config.Data.publication = False" >> ${subfile} 
                 echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                echo "config.Data.splitting = 'FileBased'" >> ${subfile} 
-                echo "config.Data.unitsPerJob = 1" >> ${subfile} 
+                echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 

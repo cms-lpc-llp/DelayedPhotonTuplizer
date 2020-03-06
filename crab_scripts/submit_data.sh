@@ -26,8 +26,7 @@ do
                 echo "config.section_(\"Data\")" >> ${subfile} 
                 echo "config.Data.publication = False" >> ${subfile} 
                 echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                echo "config.Data.splitting = 'LumiBased'" >> ${subfile} 
-                echo "config.Data.unitsPerJob = 100" >> ${subfile} 
+                echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
                 echo "config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
