@@ -49,7 +49,7 @@ config.Data.publication = False
 #config.Data.publishDbsUrl = 'phys03' #enable for publishing
 #config.Data.publishDataName = 'razorNtuple'
 #config.Data.ignoreLocality = False #disable AAA
-config.Data.ignoreLocality = True #enable AAA
+config.Data.ignoreLocality = False #enable AAA
 
 config.section_("Site")
 config.Site.storageSite = 'T2_US_Caltech'
