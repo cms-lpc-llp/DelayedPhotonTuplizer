@@ -1,3 +1,5 @@
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+
 if [ ! -d submit ];
 then
     mkdir submit

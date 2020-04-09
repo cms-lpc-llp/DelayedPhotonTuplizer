@@ -1,3 +1,5 @@
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+
 if [ ! -d submit ];
 then
     mkdir submit
@@ -37,6 +39,6 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC/GJets/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/GJets/'" >> ${subfile} 
                crab submit -c ${subfile} 
 done

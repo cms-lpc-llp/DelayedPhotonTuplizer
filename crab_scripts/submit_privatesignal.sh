@@ -1,3 +1,5 @@
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+
 for lambda in 100 150 200 250 300 350 400
 do
         for ctau in 1 50 100 10000
@@ -24,7 +26,7 @@ do
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
                 echo "config.Data.inputDBS = 'phys03'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC/MC2017PrivateGMSB/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/MC2017PrivateGMSB/'" >> ${subfile} 
                 #crab submit -c ${subfile} 
         done
 done

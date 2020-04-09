@@ -1,3 +1,5 @@
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+
 if [ ! -d submit ];
 then
     mkdir submit
@@ -17,7 +19,7 @@ do
                 query_="dasgoclient --query=\"dataset=/QCD_HT${HT}_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2*v2/* instance=prod/global\""
                 inputDataset=`eval ${query_}`
                 if [[ -z  $inputDataset  ]]; then
-                    query_="dasgoclient --query=\"dataset=/QCD_HT${HT}_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2*new*/* instance=prod/global\""
+                    query_="dasgoclient --query=\"dataset=/QCD_HT${HT}*/RunIIFall17MiniAODv2*new*/* instance=prod/global\""
                     inputDataset=`eval ${query_}`
                 fi
                 echo ${inputDataset}
@@ -36,10 +38,12 @@ do
                 echo "config.section_(\"Data\")" >> ${subfile} 
                 echo "config.Data.publication = False" >> ${subfile} 
                 echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
+                echo "config.Data.splitting = 'LumiBased'" >> ${subfile} 
+                echo "config.Data.unitsPerJob = 100" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC/QCD/'" >> ${subfile} 
-                crab submit -c ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/QCD/'" >> ${subfile} 
+                echo "Written to ${subfile}"
+    #            crab submit -c ${subfile} 
 done
