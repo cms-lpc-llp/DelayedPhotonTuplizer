@@ -69,10 +69,10 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     enableEcalRechits = cms.bool(True), 
     readGenVertexTime = cms.untracked.bool(False),
     enableAK8Jets = cms.bool(False), 
-    triggerPathNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorHLTPathnames.dat"),
+    triggerPathNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorHLTPathnames2016.dat"),
     eleHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorElectronHLTFilterNames.dat"),
     muonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorMuonHLTFilterNames.dat"),
-    photonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorPhotonHLTFilterNames.dat"),
+    photonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorPhotonHLTFilterNames2016.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     
