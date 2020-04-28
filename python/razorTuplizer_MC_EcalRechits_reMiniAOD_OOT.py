@@ -19,7 +19,8 @@ process.source = cms.Source("PoolSource",
         #'file:/afs/cern.ch/user/d/dgawerc/public/CMSSW_9_2_5/src/step3_PAT.root'
 	#'file:/afs/cern.ch/work/z/zhicaiz/public/release/McM/forGillian/withGenParticleFix/CMSSW_9_2_5/src/step3_PAT.root'
 	#'/store/user/zhicaiz/NeutralinoNeutralinoToGravitinoGravitinoPhotonPhoton/Mass1000_LifeTime5000_08Aug2017_MINIAODSIM/NeutralinoNeutralinoToGravitinoGravitinoPhotonPhoton_M-1000_CTau-5000mm_13TeV-pythia8/crab_CMSSW_9_2_5_NeutNeutToGravGrav_Mass1000_LifeTime5000_08Aug2017_MINIAODSIM_T2Caltech_v1/170809_090054/0000/step3_PAT_1.root'
-	'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-100TeV_Ctau-10cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/90000/FA57EC38-3EAB-E811-AB3A-FA163E4D91D3.root'
+	#'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-100TeV_Ctau-10cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/90000/FA57EC38-3EAB-E811-AB3A-FA163E4D91D3.root'
+	'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-250TeV_Ctau-200cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/EC19C203-08C4-E811-9207-141877639F59.root'
 )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )

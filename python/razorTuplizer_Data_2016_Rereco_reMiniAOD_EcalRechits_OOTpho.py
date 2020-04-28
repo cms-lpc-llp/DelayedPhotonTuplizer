@@ -59,6 +59,8 @@ for idmod in my_id_modules:
 
 
 #------ Analyzer ------#
+from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
+process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 #list input collections
 process.ntuples = cms.EDAnalyzer('RazorTuplizer', 
@@ -69,12 +71,13 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     enableEcalRechits = cms.bool(True), 
     readGenVertexTime = cms.untracked.bool(False),
     enableAK8Jets = cms.bool(False), 
-    triggerPathNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorHLTPathnames2016.dat"),
-    eleHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorElectronHLTFilterNames.dat"),
-    muonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorMuonHLTFilterNames.dat"),
-    photonHLTFilterNamesFile = cms.string("SUSYBSMAnalysis/RazorTuplizer/data/RazorPhotonHLTFilterNames2016.dat"),
+    triggerPathNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorHLTPathnames2016.dat"),
+    eleHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorElectronHLTFilterNames.dat"),
+    muonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorMuonHLTFilterNames.dat"),
+    photonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames2016.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    tracks = cms.InputTag("unpackedTracksAndVertices"),
     
     muons = cms.InputTag("slimmedMuons"),
     electrons = cms.InputTag("slimmedElectrons"),
@@ -197,6 +200,7 @@ process.egcorrMET = cms.Sequence(
 
 process.ntupleStep = cms.Path(process.fullPatMetSequence *
                               process.egcorrMET * 
+                              process.unpackedTracksAndVertices *
                               process.ntuples)
 
 process.schedule = cms.Schedule( process.egmIDPath,
