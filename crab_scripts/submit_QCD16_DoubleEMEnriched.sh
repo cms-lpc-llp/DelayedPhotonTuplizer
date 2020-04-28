@@ -6,9 +6,9 @@ then
 fi
 
 for PT in \
-    30to40
-#    40toInf \
-#    30toInf
+    30to40 \
+    40toInf \
+    30toInf
 do
                 subfile=submit_Summer16/QCD_Pt${PT}_DoubleEMEnriched_TuneCUETP8M1_13TeV_pythia8.py
                 query_="dasgoclient --query=\"dataset=/QCD_Pt-${PT}*DoubleEMEnriched*/RunIISummer16MiniAODv3*/MINIAODSIM instance=prod/global\""
