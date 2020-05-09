@@ -13,8 +13,8 @@ config.JobType.allowUndistributedCMSSW = True
 config.section_("Data")
 config.Data.publication = False
 config.Data.inputDataset = '/QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM'
-config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob = 1000
+config.Data.splitting = 'FileBased'
+config.Data.unitsPerJob = 1
 
 config.section_("Site")
 config.Site.storageSite = 'T2_US_Caltech'
