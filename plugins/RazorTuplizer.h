@@ -49,7 +49,6 @@ using namespace std;
 #include "DataFormats/METReco/interface/HcalNoiseSummary.h"
 #include "DataFormats/Candidate/interface/VertexCompositePtrCandidate.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
@@ -254,8 +253,6 @@ protected:
   edm::EDGetTokenT<bool> badMuonFilterToken_;
   edm::EDGetTokenT<edm::PtrVector<reco::Muon>> badGlobalMuonFilterToken_;
   edm::EDGetTokenT<edm::PtrVector<reco::Muon>> duplicateMuonFilterToken_;
-  edm::InputTag lheRunInfoTag_;
-  edm::EDGetTokenT<LHERunInfoProduct> lheRunInfoToken_;
   edm::EDGetTokenT<LHEEventProduct> lheInfoToken_;
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken_;
   edm::EDGetTokenT<GenLumiInfoHeader> genLumiHeaderToken_;

@@ -51,8 +51,6 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
   hbheIsoNoiseFilterToken_(consumes<bool>(iConfig.getParameter<edm::InputTag>("hbheIsoNoiseFilter"))),
   badChargedCandidateFilterToken_(consumes<bool>(iConfig.getParameter<edm::InputTag>("BadChargedCandidateFilter"))),
   badMuonFilterToken_(consumes<bool>(iConfig.getParameter<edm::InputTag>("BadMuonFilter"))),
-  lheRunInfoTag_(iConfig.getParameter<edm::InputTag>("lheInfo")),
-  lheRunInfoToken_(consumes<LHERunInfoProduct,edm::InRun>(lheRunInfoTag_)),
   lheInfoToken_(consumes<LHEEventProduct>(iConfig.getParameter<edm::InputTag>("lheInfo"))),
   genInfoToken_(consumes<GenEventInfoProduct>(iConfig.getParameter<edm::InputTag>("genInfo"))),
   genLumiHeaderToken_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator",""))),
@@ -767,6 +765,9 @@ void RazorTuplizer::enableMCBranches(){
   if (isFastsim_) {
     RazorEvents->Branch("lheComments", "std::string",&lheComments);
   }
+  scaleWeights = new std::vector<float>; scaleWeights->clear();
+  pdfWeights = new std::vector<float>; pdfWeights->clear();
+  alphasWeights = new std::vector<float>; alphasWeights->clear();
   RazorEvents->Branch("scaleWeights", "std::vector<float>",&scaleWeights);
   RazorEvents->Branch("pdfWeights", "std::vector<float>",&pdfWeights);
   RazorEvents->Branch("alphasWeights", "std::vector<float>",&alphasWeights);
@@ -864,6 +865,7 @@ void RazorTuplizer::loadEvent(const edm::Event& iEvent){
 
 //called by the loadEvent() method
 void RazorTuplizer::resetBranches(){
+
     //reset tree variables
     nBunchXing = 0;
     nMuons = 0;
@@ -1166,7 +1168,7 @@ void RazorTuplizer::resetBranches(){
           ecalRechit_pedrms1->clear();
       }
     }
-    
+
     if (useGen_) 
     {
         for(int i = 0; i < GENPARTICLEARRAYSIZE; i++){
@@ -1291,9 +1293,9 @@ void RazorTuplizer::resetBranches(){
         genQScale = -999;
         genAlphaQCD = -999;
         genAlphaQED = -999;
-        scaleWeights->clear();
-        pdfWeights->clear();
-        alphasWeights->clear();
+	scaleWeights->clear();
+	pdfWeights->clear();
+	alphasWeights->clear();
     }
     HLTMR = -999;
     HLTRSQ = -999;
@@ -3260,62 +3262,7 @@ void RazorTuplizer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 	firstAlphasWeight = -1;
 	lastAlphasWeight = -1;
       }    
-    } else {
-      edm::Handle<LHERunInfoProduct> lheRunInfo;
-      iRun.getByLabel(lheRunInfoTag_,lheRunInfo);
-    
-      if (lheRunInfo.isValid()) {
-	int pdfidx = lheRunInfo->heprup().PDFSUP.first;
-      
-	if (pdfidx == 263000) {
-	  //NNPDF30_lo_as_0130 (nf5) for LO madgraph samples and SUSY signals
-	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_hessian_60.csv"));
-	  firstPdfWeight = 10;
-	  lastPdfWeight = 109;
-	  firstAlphasWeight = -1;
-	  lastAlphasWeight = -1;      
-	}
-	else if (pdfidx == 263400) {
-	  //NNPdf30_lo_as_0130_nf4 for LO madgraph samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
-	  firstPdfWeight = 111;
-	  lastPdfWeight = 210;
-	  firstAlphasWeight = -1;
-	  lastAlphasWeight = -1;            
-	}
-	else if (pdfidx == 260000 || pdfidx == -1) {
-	  //NNPdf30_nlo_as_0118 (nf5) for NLO powheg samples
-	  //(work around apparent bug in current powheg samples by catching "-1" as well)
-	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
-	  firstPdfWeight = 9;
-	  lastPdfWeight = 108;
-	  firstAlphasWeight = 109;
-	  lastAlphasWeight = 110; 
-	}
-	else if (pdfidx == 292200) {
-	  //NNPdf30_nlo_as_0118 (nf5) with built-in alphas variations for NLO aMC@NLO samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
-	  firstPdfWeight = 9;
-	  lastPdfWeight = 108;
-	  firstAlphasWeight = 109;
-	  lastAlphasWeight = 110; 
-	}   
-	else if (pdfidx == 292000) {
-	  //NNPdf30_nlo_as_0118_nf4 with built-in alphas variations for NLO aMC@NLO samples
-	  pdfweightshelper.Init(100,60,edm::FileInPath("Tuplizer/DelayedPhotonTuplizer/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
-	  firstPdfWeight = 9;
-	  lastPdfWeight = 108;
-	  firstAlphasWeight = 109;
-	  lastAlphasWeight = 110;
-	}
-	else {
-	  firstPdfWeight = -1;
-	  lastPdfWeight = -1;
-	  firstAlphasWeight = -1;
-	  lastAlphasWeight = -1;
-	}    
-      }
-    }    
+    }
   }
   else {
     firstPdfWeight = -1;
@@ -3350,7 +3297,7 @@ void RazorTuplizer::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm:
 
 void RazorTuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   using namespace edm;
-//  cout << "Event: " << iEvent.id().run() << " " << iEvent.luminosityBlock() << " " << iEvent.id().event() << "\n";
+  //cout << "Event: " << iEvent.id().run() << " " << iEvent.luminosityBlock() << " " << iEvent.id().event() << "\n";
 
   //initialize
   resetBranches();
@@ -3360,7 +3307,7 @@ void RazorTuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   //filler methods should fill relevant tree variables and return false if the event should be rejected
   bool isGoodEvent = fillEventInfo(iEvent) && fillPVAll();
-
+  
   //Fill Standard Objects
   isGoodEvent = isGoodEvent 
     && fillMuons(iEvent)
@@ -3384,7 +3331,7 @@ void RazorTuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       && fillPileUp()
       && fillGenParticles();
   }
-  
+
   isGoodEvent = isGoodEvent&&isGoodMCEvent;
   if (enableTriggerInfo_) isGoodEvent = (isGoodEvent && fillTrigger(iEvent));
 
