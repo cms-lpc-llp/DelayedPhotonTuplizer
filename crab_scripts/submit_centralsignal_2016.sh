@@ -5,24 +5,19 @@ then
     mkdir submit
 fi
 
-for PT in \
-    30to40 \
-    40toInf \
-    30toInf
+for lambda in 100 150 200 250 300 350 400
 do
-                subfile=submit_Summer16/QCD_Pt${PT}_DoubleEMEnriched_TuneCUETP8M1_13TeV_pythia8.py
-                query_="dasgoclient --query=\"dataset=/QCD_Pt-${PT}*DoubleEMEnriched*/RunIISummer16MiniAODv3*/MINIAODSIM instance=prod/global\""
+        for ctau in 10 200 400 600 800 1000 1200
+        do
+                subfile=submit/GMSB_L-${lambda}TeV_Ctau-${ctau}cm_central.py
+                query_="dasgoclient --query=\"dataset=/GMSB_L-${lambda}TeV*Ctau-${ctau}cm*/RunIISummer16MiniAODv2*/* instance=prod/global\""
                 inputDataset=`eval ${query_}`
-#                if [[ -z  $inputDataset  ]]; then
-#                    query_="dasgoclient --query=\"dataset=/QCD_HT${HT}*/RunIISummer16MiniAODv3*/MINIAODSIM instance=prod/global\""
-#                    inputDataset=`eval ${query_}`
-#                fi
                 echo ${inputDataset}
                 echo "from WMCore.Configuration import Configuration" > ${subfile}
                 echo "config = Configuration()" >> ${subfile}
                 echo "" >> ${subfile}
                 echo "config.section_(\"General\")" >> ${subfile}
-                echo "config.General.requestName = 'prodSummer16_Run2DelayedPhotonNtupler_QCD_Pt_${PT}_DoubleEMEnriched_TuneCUETP8M1_13TeV_pythia8'" >> ${subfile} 
+                echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler_MC2016_GMSB_L${lambda}TeV_Ctau-${ctau}cm_central'" >> ${subfile} 
                 echo "config.General.workArea = 'crab'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"JobType\")" >> ${subfile} 
@@ -33,12 +28,11 @@ do
                 echo "config.section_(\"Data\")" >> ${subfile} 
                 echo "config.Data.publication = False" >> ${subfile} 
                 echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                echo "config.Data.splitting = 'FileBased'" >> ${subfile} 
-                echo "config.Data.unitsPerJob = 1" >> ${subfile} 
+                echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2016/QCD_DoubleEMEnriched/'" >> ${subfile} 
-                echo "Written to ${subfile}"
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2016/MC2016CentralGMSB/'" >> ${subfile} 
                 crab submit -c ${subfile} 
+        done
 done

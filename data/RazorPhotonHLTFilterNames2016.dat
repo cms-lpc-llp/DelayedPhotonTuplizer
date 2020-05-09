@@ -83,3 +83,8 @@
 # HLT_Photon165_HE10
 36 hltEG165HE10Filter
 
+# HLT_Photon90_CaloIdL_PFHT500
+37 hltEG90CaloIdLHEFilter
+
+# HLT_Photon90_CaloIdL_PFHT600
+38 hltEG90CaloIdLHEFilter

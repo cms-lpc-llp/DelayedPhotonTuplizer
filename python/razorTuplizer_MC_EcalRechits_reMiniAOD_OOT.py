@@ -14,12 +14,13 @@ process.source = cms.Source("PoolSource",
         #'/store/mc/RunIISpring16MiniAODv1/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/20000/0017320C-7BFC-E511-9B2D-0CC47A4C8E34.root'
         #'/store/mc/RunIISpring16MiniAODv1/SMS-T2bH_mSbottom-300_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/30000/329EF9EB-C217-E611-A0A1-0CC47A6C1818.root'
 #        '/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/00000/001B3734-EE39-E611-9D0B-A0000420FE80.root'
-     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
+     #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
         #'/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/120000/0EA60289-18C4-E611-8A8F-008CFA110AB4.root'
         #'file:/afs/cern.ch/user/d/dgawerc/public/CMSSW_9_2_5/src/step3_PAT.root'
 	#'file:/afs/cern.ch/work/z/zhicaiz/public/release/McM/forGillian/withGenParticleFix/CMSSW_9_2_5/src/step3_PAT.root'
 	#'/store/user/zhicaiz/NeutralinoNeutralinoToGravitinoGravitinoPhotonPhoton/Mass1000_LifeTime5000_08Aug2017_MINIAODSIM/NeutralinoNeutralinoToGravitinoGravitinoPhotonPhoton_M-1000_CTau-5000mm_13TeV-pythia8/crab_CMSSW_9_2_5_NeutNeutToGravGrav_Mass1000_LifeTime5000_08Aug2017_MINIAODSIM_T2Caltech_v1/170809_090054/0000/step3_PAT_1.root'
 	#'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-100TeV_Ctau-10cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/90000/FA57EC38-3EAB-E811-AB3A-FA163E4D91D3.root'
+	'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-250TeV_Ctau-200cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/EC19C203-08C4-E811-9207-141877639F59.root'
 )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -85,10 +86,10 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     enableEcalRechits = cms.bool(True),                                 
     readGenVertexTime = cms.untracked.bool(False),
     genParticles_t0 = cms.InputTag("genParticles", "t0", ""), 
-    triggerPathNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorHLTPathnames.dat"),
+    triggerPathNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorHLTPathnames2016.dat"),
     eleHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorElectronHLTFilterNames.dat"),
     muonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorMuonHLTFilterNames.dat"),
-    photonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames.dat"),
+    photonHLTFilterNamesFile = cms.string("Tuplizer/DelayedPhotonTuplizer/data/RazorPhotonHLTFilterNames2016.dat"),
 
     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     tracks = cms.InputTag("unpackedTracksAndVertices"),
