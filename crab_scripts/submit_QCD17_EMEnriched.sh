@@ -5,26 +5,28 @@ then
     mkdir submit
 fi
 
-for HT in \
-    40_80 \
-    80toInf
+for Pt in \
+    15to20 \
+    20to30 \
+    30to50 \
+    50to80 \
+    80to120 \
+    120to170 \
+    170to300 \
+    300toInf 
 do
-                query_="dasgoclient --query=\"dataset=/DiPhotonJetsBox_M*${HT}*/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14*/MINIAODSIM instance=prod/global\""
+                query_="dasgoclient --query=\"dataset=/QCD_Pt-${Pt}_EMEnriched_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2*/MINIAODSIM instance=prod/global\""
                 inputDataset=`eval ${query_}`
-                if [[ -z  $inputDataset  ]]; then
-                    query_="dasgoclient --query=\"dataset=/DiPhotonJetsBox_M*${HT}*/RunIIFall17MiniAODv2*/MINIAODSIM instance=prod/global\""
-                    inputDataset=`eval ${query_}`
-                fi
-                if [ ! -z $inputDataset ]; 
+                if [ ! -z ${inputDataset} ];
                 then
-                    subfile=submit/DiPhotonJetsBox_M${HT}_Sherpa.py
-
+                    subfile=submit/QCD_Pt${Pt}_EMEnriched_TuneCP5_13TeV_pythia8.py
+                
                     echo ${inputDataset}
                     echo "from WMCore.Configuration import Configuration" > ${subfile}
                     echo "config = Configuration()" >> ${subfile}
                     echo "" >> ${subfile}
                     echo "config.section_(\"General\")" >> ${subfile}
-                    echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler2017_DiPhotonJetsBox_M${HT}_Sherpa'" >> ${subfile} 
+                    echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler2017_QCD_Pt${Pt}_TuneCP5_13TeV_pythia8'" >> ${subfile} 
                     echo "config.General.workArea = 'crab'" >> ${subfile} 
                     echo "" >> ${subfile} 
                     echo "config.section_(\"JobType\")" >> ${subfile} 
@@ -39,7 +41,8 @@ do
                     echo "" >> ${subfile} 
                     echo "config.section_(\"Site\")" >> ${subfile} 
                     echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                    echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/DiPhoton/'" >> ${subfile} 
+                    echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/QCD_EMEnriched/'" >> ${subfile} 
+                    echo "Written to ${subfile}"
                     crab submit -c ${subfile} 
-               fi
+                fi
 done
