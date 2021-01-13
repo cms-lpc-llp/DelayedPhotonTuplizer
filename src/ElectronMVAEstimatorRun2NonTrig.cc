@@ -189,10 +189,10 @@ Double_t ElectronMVAEstimatorRun2NonTrig::mvaValue(const reco::GsfElectron& ele,
   fMVAVar_gsfhits         =  ele.gsfTrack()->hitPattern().trackerLayersWithMeasurement();
   fMVAVar_expectedMissingInnerHits = ele.gsfTrack()->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
 
-  reco::ConversionRef conv_ref = ConversionTools::matchedConversion(ele,conversions, beamspotPosition);
+  const reco::Conversion *conv_ref = ConversionTools::matchedConversion(ele,(*conversions), beamspotPosition);
   double vertexFitProbability = -1.; 
-  if(!conv_ref.isNull()) {
-    const reco::Vertex &vtx = conv_ref.get()->conversionVertex(); if (vtx.isValid()) {
+  if(conv_ref) {
+    const reco::Vertex &vtx = conv_ref->conversionVertex(); if (vtx.isValid()) {
       vertexFitProbability = TMath::Prob( vtx.chi2(), vtx.ndof());
     } 
   }
@@ -299,10 +299,10 @@ Double_t ElectronMVAEstimatorRun2NonTrig::mvaValue(const pat::Electron& ele,
     fMVAVar_gsfhits         =  ele.gsfTrack()->found();
     fMVAVar_expectedMissingInnerHits = ele.gsfTrack()->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
 
-    reco::ConversionRef conv_ref = ConversionTools::matchedConversion(ele,conversions, beamspotPosition);
+    const reco::Conversion *conv_ref = ConversionTools::matchedConversion(ele,(*conversions), beamspotPosition);
     double vertexFitProbability = -1.; 
-    if(!conv_ref.isNull()) {
-      const reco::Vertex &vtx = conv_ref.get()->conversionVertex(); if (vtx.isValid()) {
+    if(conv_ref) {
+      const reco::Vertex &vtx = conv_ref->conversionVertex(); if (vtx.isValid()) {
 	vertexFitProbability = TMath::Prob( vtx.chi2(), vtx.ndof());
       } 
     }
