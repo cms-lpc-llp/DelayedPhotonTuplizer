@@ -23,7 +23,7 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"JobType\")" >> ${subfile} 
                 echo "config.JobType.pluginName = 'Analysis'" >> ${subfile} 
-                echo "config.JobType.psetName = '${CMSSW_BASE}/src/Tuplizer/DelayedPhotonTuplizer/python/razorTuplizer_DataUL_2018ABC_Rereco_EcalRechits_OOTpho.py'" >> ${subfile} 
+                echo "config.JobType.psetName = '${CMSSW_BASE}/src/Tuplizer/DelayedPhotonTuplizer/python/razorTuplizer_DataUL_2018_Rereco_EcalRechits_OOTpho.py'" >> ${subfile} 
                 echo "config.JobType.allowUndistributedCMSSW = True" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Data\")" >> ${subfile} 
@@ -60,7 +60,7 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"JobType\")" >> ${subfile} 
                 echo "config.JobType.pluginName = 'Analysis'" >> ${subfile} 
-                echo "config.JobType.psetName = '${CMSSW_BASE}/src/Tuplizer/DelayedPhotonTuplizer/python/razorTuplizer_DataUL_2018D_PromptReco_EcalRechits_OOTpho.py'" >> ${subfile} 
+                echo "config.JobType.psetName = '${CMSSW_BASE}/src/Tuplizer/DelayedPhotonTuplizer/python/razorTuplizer_DataUL_2018_PromptReco_EcalRechits_OOTpho.py'" >> ${subfile} 
                 echo "config.JobType.allowUndistributedCMSSW = True" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Data\")" >> ${subfile} 
