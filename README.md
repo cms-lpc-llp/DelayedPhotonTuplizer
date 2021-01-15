@@ -3,28 +3,27 @@ Delayed Photon Ntuplizer
 
 Razor ntuplizer for running over LHC Run 2 miniAOD compatible with CMSSW_9_4_9.
 
-N.B. For 2018 data, please use at least CMSSW_10_2_X. Full recipe by PPD can be found here https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable
+N.B. For 2018 UL data, please use at least CMSSW_10_6_X. Full recipe by PPD can be found here https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun2LegacyAnalysisSummaryTable
 
 -----------------------------------
 Instructions for compiling in CMSSW
 -----------------------------------
 
-    cmsrel CMSSW_9_4_9
-    cd CMSSW_9_4_9/src
+    cmsrel CMSSW_10_6_12
+    cd CMSSW_10_6_12/src
     cmsenv
-    git clone git@github.com:cms-lpc-llp/DelayedPhotonTuplizer.git Tuplizer/DelayedPhotonTuplizer
+    git clone -b Tuplize_2018UL git@github.com:cms-lpc-llp/DelayedPhotonTuplizer.git Tuplizer/DelayedPhotonTuplizer
     scram b
 
 ---------------------    
 Running the ntuplizer
 ---------------------
 
-    cmsRun python/razorTuplizer_MC_Fall17_EcalRechits_reMiniAOD_OOT.py
+    cmsRun python/razorTuplizer_DataUL_2018_Rereco_EcalRechits_OOTpho.py
 
     
 Before running, check python/razorTuplizer.py to make sure that the correct global tag is defined. (process.GlobalTag.globaltag = ...)
 
-To run on 2018 data, there is no python config file yet. Please make a version for 2018 based on `razorTuplizer_MC_Fall17_EcalRechits_reMiniAOD_OOT.py` and `razorTuplizer_Data_2017_Rereco_EcalRechits_OOTpho.py` and update proper tags and other necessary changes.
 
 To run a test job with CRAB3:
 
