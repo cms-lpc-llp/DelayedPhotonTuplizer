@@ -41,9 +41,9 @@ process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v15_L1v1'
 #process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
 
 #process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
-#process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
-#process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-#process.BadChargedCandidateFilter.taggingMode = cms.bool(True)
+process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+process.BadChargedCandidateFilter.taggingMode = cms.bool(True)
 
 process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
 process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
@@ -116,7 +116,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     hbheNoiseFilter = cms.InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"),
     hbheTightNoiseFilter = cms.InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResultRun2Tight"),
     hbheIsoNoiseFilter = cms.InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"),
-    #BadChargedCandidateFilter = cms.InputTag("BadChargedCandidateFilter",""),
+    BadChargedCandidateFilter = cms.InputTag("BadChargedCandidateFilter",""),
     BadMuonFilter = cms.InputTag("BadPFMuonFilter",""),
     badGlobalMuonFilter = cms.InputTag("badGlobalMuonTagger","bad"),
     duplicateMuonFilter = cms.InputTag("cloneGlobalMuonTagger","bad"),
@@ -163,7 +163,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
 #run
 process.p = cms.Path( process.egmGsfElectronIDSequence *
                       #process.HBHENoiseFilterResultProducer*
-                      #process.BadChargedCandidateFilter*
+                      process.BadChargedCandidateFilter*
                       process.BadPFMuonFilter*
                       process.unpackedTracksAndVertices *
                       process.ntuples)
