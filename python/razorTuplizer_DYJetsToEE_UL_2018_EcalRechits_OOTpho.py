@@ -122,7 +122,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     duplicateMuonFilter = cms.InputTag("cloneGlobalMuonTagger","bad"),
 
     lheInfo = cms.InputTag("externalLHEProducer", "", ""),
-    genInfo = cms.InputTag("generator", "", "SIM"),
+    genInfo = cms.InputTag("generator", "", "GEN"),
     puInfo = cms.InputTag("slimmedAddPileupInfo", "", "PAT"), #uncomment if no pre-mixing
     #puInfo = cms.InputTag("mixData", "", "HLT"), #uncomment for samples with pre-mixed pileup
     hcalNoiseInfo = cms.InputTag("hcalnoise", "", "PAT"),
