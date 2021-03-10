@@ -3,15 +3,15 @@ import FWCore.ParameterSet.Config as cms
 #------ Setup ------#
 
 #initialize the process
-process = cms.Process("razorTuplizer")
+process = cms.Process("RazorTuplizer")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff")
 process.load("Configuration.EventContent.EventContent_cff")
 
 #load input files
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(        
-        '/store/data/Run2018D/EGamma/MINIAOD/12Nov2019_UL2018-v4/00000/011BB257-AB2C-0940-A242-F6451B1EBA33.root'             
+    fileNames = cms.untracked.vstring(
+        '/store/data/Run2018D/EGamma/MINIAOD/12Nov2019_UL2018-v4/00000/011BB257-AB2C-0940-A242-F6451B1EBA33.root'                
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -19,7 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #TFileService for output 
 process.TFileService = cms.Service("TFileService", 
-    fileName = cms.string("razorNtuple.root"),
+    fileName = cms.string("razorNtuple_recal.root"),
     closeFileFast = cms.untracked.bool(True),
 )
 
@@ -31,7 +31,33 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #------ Declare the correct global tag ------#
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable
-process.GlobalTag.globaltag = '102X_dataRun2_Prompt_v15'
+#process.GlobalTag.globaltag = '106X_upgrade2018_realistic_v15_L1v1'
+
+from CondCore.CondDB.CondDB_cfi import *
+process.GlobalTag = cms.ESSource("PoolDBESSource",
+                                 CondDB.clone(connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')),
+                                 #CondDB.clone(connect = cms.string('frontier://FrontierProd/CMS_COND_106X_FRONTIER')),
+                                 globaltag = cms.string('106X_upgrade2018_realistic_v15_L1v1'),
+                                 # Get time calibration (corrections) tag
+                                 toGet = cms.VPSet(
+                                     cms.PSet(record = cms.string("EcalTimeCalibConstantsRcd"),
+                                              tag = cms.string("EcalTimeCalibConstants_2018_RunD_UL_Corr_v2"),
+                                              connect = cms.string("sqlite_file:EcalTimeCalibConstants_2018_RunD_UL_Corr_v2.db"),
+                                              #connect = cms.string("sqlite_file:/storage/user/yeseo/DelayedPhoton/CMSSW_10_6_20/src/EcalTimeCalibConstants_2018_RunD_UL_Corr_v2.db"),
+                                          )
+                                 )
+)
+
+
+#------ Time re-calibration for 2018D legacy reco ------#
+
+process.load("RecoLocalCalo.EcalRecProducers.ecalRecalibRecHit_cfi")
+process.ecalRecalibRecHit.EBRecHitCollection = cms.InputTag("reducedEgamma", "reducedEBRecHits")
+process.ecalRecalibRecHit.EERecHitCollection = cms.InputTag("reducedEgamma", "reducedEERecHits")
+process.ecalRecalibRecHit.EBRecalibRecHitCollection = cms.string('recalibEcalRecHitsEB')
+process.ecalRecalibRecHit.EERecalibRecHitCollection = cms.string('recalibEcalRecHitsEE')
+process.ecalRecalibRecHit.doTimeCalib = True
+process.recalib_sequence = cms.Sequence(process.ecalRecalibRecHit)
 
 #------ If we add any inputs beyond standard miniAOD event content, import them here ------#
 
@@ -111,7 +137,7 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     BadMuonFilter = cms.InputTag("BadPFMuonFilter",""),
 
     lheInfo = cms.InputTag("externalLHEProducer", "", "LHE"),
-    genInfo = cms.InputTag("generator", "", "SIM"),
+    genInfo = cms.InputTag("generator", "", "GEN"),
     puInfo = cms.InputTag("addPileupInfo", "", "HLT"), #uncomment if no pre-mixing
     #puInfo = cms.InputTag("mixData", "", "HLT"), #uncomment for samples with pre-mixed pileup
     hcalNoiseInfo = cms.InputTag("hcalnoise", "", "RECO"),
@@ -146,8 +172,10 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
 )
 
 #run
-process.p = cms.Path( process.egmGsfElectronIDSequence *
-                      process.BadChargedCandidateFilter*
-                      process.BadPFMuonFilter*
+process.p = cms.Path( 
+                      process.egmGsfElectronIDSequence *
+                      process.recalib_sequence *
+                      #process.BadChargedCandidateFilter*
+                      #process.BadPFMuonFilter*
                       process.unpackedTracksAndVertices *
                       process.ntuples)
