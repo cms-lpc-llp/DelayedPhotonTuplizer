@@ -9,6 +9,7 @@ N.B. For 2018 UL data, please use at least CMSSW_10_6_X. Full recipe by PPD can 
 Instructions for compiling in CMSSW
 -----------------------------------
 
+    export SCRAM_ARCH=slc7_amd64_gcc700
     cmsrel CMSSW_10_6_12
     cd CMSSW_10_6_12/src
     cmsenv
