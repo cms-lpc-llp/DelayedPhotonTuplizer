@@ -19,7 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #TFileService for output 
 process.TFileService = cms.Service("TFileService", 
-    fileName = cms.string("razorNtuple_recal.root"),
+    fileName = cms.string("razorNtuple_recal_wrong_GT.root"),
     closeFileFast = cms.untracked.bool(True),
 )
 
@@ -36,14 +36,13 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 from CondCore.CondDB.CondDB_cfi import *
 process.GlobalTag = cms.ESSource("PoolDBESSource",
                                  CondDB.clone(connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')),
-                                 #CondDB.clone(connect = cms.string('frontier://FrontierProd/CMS_COND_106X_FRONTIER')),
-                                 globaltag = cms.string('106X_upgrade2018_realistic_v15_L1v1'),
+                                 #globaltag = cms.string('106X_upgrade2018_realistic_v15_L1v1'), # From the 
+                                 globaltag = cms.string('106X_dataRun2_v32'), # From the hypernews
                                  # Get time calibration (corrections) tag
                                  toGet = cms.VPSet(
                                      cms.PSet(record = cms.string("EcalTimeCalibConstantsRcd"),
                                               tag = cms.string("EcalTimeCalibConstants_2018_RunD_UL_Corr_v2"),
                                               connect = cms.string("sqlite_file:EcalTimeCalibConstants_2018_RunD_UL_Corr_v2.db"),
-                                              #connect = cms.string("sqlite_file:/storage/user/yeseo/DelayedPhoton/CMSSW_10_6_20/src/EcalTimeCalibConstants_2018_RunD_UL_Corr_v2.db"),
                                           )
                                  )
 )
