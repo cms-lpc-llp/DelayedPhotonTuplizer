@@ -11,7 +11,7 @@ process.load("Configuration.EventContent.EventContent_cff")
 #load input files
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/data/Run2018D/EGamma/MINIAOD/12Nov2019_UL2018-v4/00000/011BB257-AB2C-0940-A242-F6451B1EBA33.root'                
+        'file:01F6D50E-0AF1-324C-872D-09FB91869B70.root'                
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -152,8 +152,8 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
 
     beamSpot = cms.InputTag("offlineBeamSpot", "", "RECO"),
 
-    ebRecHits = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEB", "EcalTimeRecalibTEST"),
-    eeRecHits = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEE", "EcalTimeRecalibTEST"),
+    ebRecHits = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEB"),
+    eeRecHits = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEE"),
     esRecHits = cms.InputTag("reducedEgamma", "reducedESRecHits", "RECO"),
     ebeeClusters = cms.InputTag("reducedEgamma", "reducedEBEEClusters", "RECO"),
     esClusters = cms.InputTag("reducedEgamma", "reducedESClusters", "RECO"),
