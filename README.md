@@ -3,15 +3,35 @@ Delayed Photon Ntuplizer
 
 Razor ntuplizer for running over LHC Run 2 miniAOD compatible with CMSSW_9_4_9.
 
-N.B. For 2018 data, please use at least CMSSW_10_2_X. Full recipe by PPD can be found here https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable
+N.B. For 2018 data, please use CMSSW_10_2_X. Note that CMSSW_10_6_X will break and you will need to use the Tuplize_2018UL branch. Full recipe by PPD can be found here https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable. 
+Also, extra packages need to be installed for 2018 data to obtain the photon energy corrections, according to https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2#2018_MiniAOD
 
------------------------------------
-Instructions for compiling in CMSSW
------------------------------------
+If you are running on lxplus, you will likely need to use Singularity because 10_2_X only compiles in SLC6, which is not supported on lxplus.
 
-    cmsrel CMSSW_9_4_9
-    cd CMSSW_9_4_9/src
+To start singularity:
+    
+    export SINGULARITY_CACHEDIR=/tmp/$(whoami)/singularity;singularity shell -B /cvmfs -B /afs -B /eos /cvmfs/singularity.opensciencegrid.org/bbockelm/cms:rhel6
+    source /cvmfs/cms.cern.ch/cmsset_default.sh 
+
+To install extra packages for photon energy corrections:
+
+    export SCRAM_ARCH=slc6_amd64_gcc700
+    cmsrel CMSSW_10_2_10
+    cd CMSSW_10_2_10/src
     cmsenv
+    git cms-init
+    git cms-merge-topic cms-egamma:EgammaPostRecoTools #just adds in an extra file to have a setup function to make things easier
+    git cms-merge-topic cms-egamma:PhotonIDValueMapSpeedup1029 #optional but speeds up the photon ID value module so things fun faster
+    git cms-merge-topic cms-egamma:slava77-btvDictFix_10210 #fixes the Run2018D dictionary issue, see https://github.com/cms-sw/cmssw/issues/26182, may not be necessary for later releases, try it first and see if it works
+    #now to add the scale and smearing for 2018 (eventually this will not be necessary in later releases but is harmless to do regardless)
+    git cms-addpkg EgammaAnalysis/ElectronTools
+    rm EgammaAnalysis/ElectronTools/data -rf
+    git clone git@github.com:cms-data/EgammaAnalysis-ElectronTools.git EgammaAnalysis/ElectronTools/data
+    #now build everything
+    scram b -j 8
+
+Now install and compile our tuplizer:
+ 
     git clone git@github.com:cms-lpc-llp/DelayedPhotonTuplizer.git Tuplizer/DelayedPhotonTuplizer
     scram b
 
@@ -23,8 +43,6 @@ Running the ntuplizer
 
     
 Before running, check python/razorTuplizer.py to make sure that the correct global tag is defined. (process.GlobalTag.globaltag = ...)
-
-To run on 2018 data, there is no python config file yet. Please make a version for 2018 based on `razorTuplizer_MC_Fall17_EcalRechits_reMiniAOD_OOT.py` and `razorTuplizer_Data_2017_Rereco_EcalRechits_OOTpho.py` and update proper tags and other necessary changes.
 
 To run a test job with CRAB3:
 
