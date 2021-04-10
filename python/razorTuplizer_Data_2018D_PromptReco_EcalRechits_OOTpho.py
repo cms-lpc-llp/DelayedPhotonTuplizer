@@ -61,6 +61,9 @@ my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
 
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+setupEgammaPostRecoSeq(process,era='2018-Prompt')  
+
 
 #------ Analyzer ------#
 from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
@@ -139,14 +142,15 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     superClusters = cms.InputTag("reducedEgamma", "reducedSuperClusters", "RECO"),
 
     lostTracks = cms.InputTag("lostTracks", "", "RECO"),
-    mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
-    mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
-    mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
-    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
+#    mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+#    mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
+#    mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
+#    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
 )
 
 #run
 process.p = cms.Path( process.egmGsfElectronIDSequence *
+                      process.egammaPostRecoSeq *
                       process.BadChargedCandidateFilter*
                       process.BadPFMuonFilter*
                       process.unpackedTracksAndVertices *
