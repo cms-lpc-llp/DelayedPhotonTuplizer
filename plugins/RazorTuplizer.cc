@@ -74,11 +74,11 @@ RazorTuplizer::RazorTuplizer(const edm::ParameterSet& iConfig):
   gedGsfElectronCoresToken_(consumes<vector<reco::GsfElectronCore> >(iConfig.getParameter<edm::InputTag>("gedGsfElectronCores"))),
   gedPhotonCoresToken_(consumes<vector<reco::PhotonCore> >(iConfig.getParameter<edm::InputTag>("gedPhotonCores"))),
   superClustersToken_(consumes<vector<reco::SuperCluster> >(iConfig.getParameter<edm::InputTag>("superClusters"))),
-  lostTracksToken_(consumes<vector<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("lostTracks"))),
-  mvaGeneralPurposeValuesMapToken_(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaGeneralPurposeValuesMap"))),
-  mvaGeneralPurposeCategoriesMapToken_(consumes<edm::ValueMap<int> >(iConfig.getParameter<edm::InputTag>("mvaGeneralPurposeCategoriesMap"))),
-  mvaHZZValuesMapToken_(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaHZZValuesMap"))),
-  mvaHZZCategoriesMapToken_(consumes<edm::ValueMap<int> >(iConfig.getParameter<edm::InputTag>("mvaHZZCategoriesMap")))
+  lostTracksToken_(consumes<vector<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("lostTracks")))
+  //mvaGeneralPurposeValuesMapToken_(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaGeneralPurposeValuesMap"))),
+  //mvaGeneralPurposeCategoriesMapToken_(consumes<edm::ValueMap<int> >(iConfig.getParameter<edm::InputTag>("mvaGeneralPurposeCategoriesMap"))),
+  //mvaHZZValuesMapToken_(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaHZZValuesMap"))),
+  //mvaHZZCategoriesMapToken_(consumes<edm::ValueMap<int> >(iConfig.getParameter<edm::InputTag>("mvaHZZCategoriesMap")))
 {
   if(readGenVertexTime_) genParticles_t0_Token_ = consumes<float>(iConfig.getParameter<edm::InputTag>("genParticles_t0"));
   for(unsigned int i=0;i<v_photonsInputTag.size();i++)
@@ -422,10 +422,10 @@ void RazorTuplizer::enableElectronBranches(){
   RazorEvents->Branch("ele_MissHits", ele_MissHits, "ele_MissHits[nElectrons]/I");
   RazorEvents->Branch("ele_PassConvVeto", ele_PassConvVeto, "ele_PassConvVeto[nElectrons]/O");
   RazorEvents->Branch("ele_OneOverEminusOneOverP", ele_OneOverEminusOneOverP, "ele_OneOverEminusOneOverP[nElectrons]/F");
-  RazorEvents->Branch("ele_IDMVAGeneralPurpose", ele_IDMVAGeneralPurpose, "ele_IDMVAGeneralPurpose[nElectrons]/F");
-  RazorEvents->Branch("ele_IDMVACategoryGeneralPurpose", ele_IDMVACategoryGeneralPurpose, "ele_IDMVACategoryGeneralPurpose[nElectrons]/I"); 
-  RazorEvents->Branch("ele_IDMVAHZZ", ele_IDMVAHZZ, "ele_IDMVAHZZ[nElectrons]/F");
-  RazorEvents->Branch("ele_IDMVACategoryHZZ", ele_IDMVACategoryHZZ, "ele_IDMVACategoryHZZ[nElectrons]/I"); 
+//  RazorEvents->Branch("ele_IDMVAGeneralPurpose", ele_IDMVAGeneralPurpose, "ele_IDMVAGeneralPurpose[nElectrons]/F");
+//  RazorEvents->Branch("ele_IDMVACategoryGeneralPurpose", ele_IDMVACategoryGeneralPurpose, "ele_IDMVACategoryGeneralPurpose[nElectrons]/I"); 
+//  RazorEvents->Branch("ele_IDMVAHZZ", ele_IDMVAHZZ, "ele_IDMVAHZZ[nElectrons]/F");
+//  RazorEvents->Branch("ele_IDMVACategoryHZZ", ele_IDMVACategoryHZZ, "ele_IDMVACategoryHZZ[nElectrons]/I"); 
   RazorEvents->Branch("ele_RegressionE", ele_RegressionE, "ele_RegressionE[nElectrons]/F");
   RazorEvents->Branch("ele_CombineP4", ele_CombineP4, "ele_CombineP4[nElectrons]/F");
   RazorEvents->Branch("ele_ptrel", ele_ptrel, "ele_ptrel[nElectrons]/F");
@@ -549,6 +549,8 @@ void RazorTuplizer::enablePhotonBranches(){
   RazorEvents->Branch("pho_mvaValue", pho_mvaValue, "pho_mvaValue[nPhotons]/F");
   RazorEvents->Branch("pho_mvaCategory", pho_mvaCategory, "pho_mvaValueCategory[nPhotons]/I");
   RazorEvents->Branch("pho_trackMatching", pho_trackMatching, "pho_trackMatching[nPhotons]/O");
+  RazorEvents->Branch("pho_energy_scale", pho_energy_scale, "pho_energy_scale[nPhotons]/F");
+  RazorEvents->Branch("pho_energy_smear", pho_energy_smear, "pho_energy_smear[nPhotons]/F");
   if (enableEcalRechits_) {
     pho_EcalRechitIndex = new std::vector<std::vector<uint> >; pho_EcalRechitIndex->clear();
     RazorEvents->Branch("pho_EcalRechitIndex", "std::vector<std::vector<uint> >",&pho_EcalRechitIndex);
@@ -1527,14 +1529,14 @@ bool RazorTuplizer::fillMuons(const edm::Event& iEvent){
 bool RazorTuplizer::fillElectrons(const edm::Event& iEvent){
 
   // Get MVA values and categories (optional)
-  edm::Handle<edm::ValueMap<float> > mvaGeneralPurposeValues;
-  edm::Handle<edm::ValueMap<int> > mvaGeneralPurposeCategories;
-  edm::Handle<edm::ValueMap<float> > mvaHZZValues;
-  edm::Handle<edm::ValueMap<int> > mvaHZZCategories;
-  iEvent.getByToken(mvaGeneralPurposeValuesMapToken_,mvaGeneralPurposeValues);
-  iEvent.getByToken(mvaGeneralPurposeCategoriesMapToken_,mvaGeneralPurposeCategories);
-  iEvent.getByToken(mvaHZZValuesMapToken_,mvaHZZValues);
-  iEvent.getByToken(mvaHZZCategoriesMapToken_,mvaHZZCategories);
+  //edm::Handle<edm::ValueMap<float> > mvaGeneralPurposeValues;
+  //edm::Handle<edm::ValueMap<int> > mvaGeneralPurposeCategories;
+  //edm::Handle<edm::ValueMap<float> > mvaHZZValues;
+  //edm::Handle<edm::ValueMap<int> > mvaHZZCategories;
+  //iEvent.getByToken(mvaGeneralPurposeValuesMapToken_,mvaGeneralPurposeValues);
+  //iEvent.getByToken(mvaGeneralPurposeCategoriesMapToken_,mvaGeneralPurposeCategories);
+  //iEvent.getByToken(mvaHZZValuesMapToken_,mvaHZZValues);
+  //iEvent.getByToken(mvaHZZCategoriesMapToken_,mvaHZZCategories);
 
   //for(const pat::Electron &ele : *electrons)
   for (size_t i = 0; i < electrons->size(); ++i)
@@ -1589,10 +1591,10 @@ bool RazorTuplizer::fillElectrons(const edm::Event& iEvent){
       //*************************************************
       //ID MVA
       //*************************************************
-      ele_IDMVAGeneralPurpose[nElectrons] = (*mvaGeneralPurposeValues)[ele];
-      ele_IDMVACategoryGeneralPurpose[nElectrons] = (*mvaGeneralPurposeCategories)[ele];
-      ele_IDMVAHZZ[nElectrons] = (*mvaHZZValues)[ele];
-      ele_IDMVACategoryHZZ[nElectrons] = (*mvaHZZCategories)[ele];
+//      ele_IDMVAGeneralPurpose[nElectrons] = (*mvaGeneralPurposeValues)[ele];
+//      ele_IDMVACategoryGeneralPurpose[nElectrons] = (*mvaGeneralPurposeCategories)[ele];
+//      ele_IDMVAHZZ[nElectrons] = (*mvaHZZValues)[ele];
+//      ele_IDMVACategoryHZZ[nElectrons] = (*mvaHZZCategories)[ele];
 
 
       ele_RegressionE[nElectrons] = ((edm::Ptr<pat::Electron>)(ele))->ecalRegressionEnergy();
@@ -2172,6 +2174,30 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
             {
                 std::cout << "No Photon ID / MVA found." << std::endl;
             }
+
+
+            //**************************************************************************
+            //Photon energy scale and smearing
+            //**************************************************************************
+            try
+            {
+                pho_energy_scale[nPhotons] = pho.userFloat("energyScaleValue");
+            }
+            catch (...)
+            {
+                std::cout << "No Photon scale found. Set it to 1." << std::endl;
+                pho_energy_scale[nPhotons] = 1.0;
+            }
+            try
+            {
+                pho_energy_smear[nPhotons] = pho.userFloat("energySigmaValue");
+            }
+            catch (...)
+            {
+                std::cout << "No Photon smearing found. Set it to 0" << std::endl;
+                pho_energy_smear[nPhotons] = 0.0;
+            }
+
 
             //**************************************************************************
             //Veto photons that overlap with tracks

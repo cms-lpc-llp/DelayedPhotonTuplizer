@@ -552,6 +552,8 @@ protected:
   bool pho_cutBasedID_loose[OBJECTARRAYSIZE];
   bool pho_cutBasedID_medium[OBJECTARRAYSIZE];
   bool pho_cutBasedID_tight[OBJECTARRAYSIZE];
+  float pho_energy_scale[OBJECTARRAYSIZE];
+  float pho_energy_smear[OBJECTARRAYSIZE];
   float pho_mvaValue[OBJECTARRAYSIZE];
   int pho_mvaCategory[OBJECTARRAYSIZE];
   bool pho_trackMatching[OBJECTARRAYSIZE];
