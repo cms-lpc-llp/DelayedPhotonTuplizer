@@ -12,7 +12,8 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(   
      #'/store/mc/RunIIAutumn18MiniAOD/QCD_HT100to200_TuneCP5_13TeV- madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15- v1/10000/4290904C-69DA-B245-88EF-A9810E692897.root'
-     'file:/tmp/sixie/4290904C-69DA-B245-88EF-A9810E692897.root'
+     '/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/100000/0E54CC52-66F0-A54D-AA47-2A29FD997F0C.root'
+     #'file:/tmp/sixie/4290904C-69DA-B245-88EF-A9810E692897.root'
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -63,7 +64,9 @@ my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
 
-
+# ------- Photon energy correction setup ------#
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+setupEgammaPostRecoSeq(process,era='2018-Prompt')  
 
 #------ Analyzer ------#
 from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
@@ -155,14 +158,15 @@ process.ntuples = cms.EDAnalyzer('RazorTuplizer',
     #superClusters = cms.VInputTag(cms.InputTag("reducedEgamma", "reducedSuperClusters", "PAT"), cms.InputTag("reducedEgamma", "reducedOOTSuperClusters", "PAT")),
 
     lostTracks = cms.InputTag("lostTracks", "", "PAT"),
-    mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
-    mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
-    mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
-    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
+#    mvaGeneralPurposeValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+#    mvaGeneralPurposeCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories"),
+#    mvaHZZValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values"),
+#    mvaHZZCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Categories"),
 )
 
 #run
 process.p = cms.Path( process.egmGsfElectronIDSequence *
+                      process.egammaPostRecoSeq *
                       #process.HBHENoiseFilterResultProducer*
                       process.BadChargedCandidateFilter*
                       process.BadPFMuonFilter*
