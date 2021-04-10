@@ -550,6 +550,8 @@ void RazorTuplizer::enablePhotonBranches(){
   RazorEvents->Branch("pho_mvaCategory", pho_mvaCategory, "pho_mvaValueCategory[nPhotons]/I");
   RazorEvents->Branch("pho_trackMatching", pho_trackMatching, "pho_trackMatching[nPhotons]/O");
   RazorEvents->Branch("pho_energy_scale", pho_energy_scale, "pho_energy_scale[nPhotons]/F");
+  RazorEvents->Branch("pho_energy_scale_up", pho_energy_scale_up, "pho_energy_scale_up[nPhotons]/F");
+  RazorEvents->Branch("pho_energy_scale_down", pho_energy_scale_down, "pho_energy_scale_down[nPhotons]/F");
   RazorEvents->Branch("pho_energy_smear", pho_energy_smear, "pho_energy_smear[nPhotons]/F");
   if (enableEcalRechits_) {
     pho_EcalRechitIndex = new std::vector<std::vector<uint> >; pho_EcalRechitIndex->clear();
@@ -2182,11 +2184,15 @@ bool RazorTuplizer::fillPhotons(const edm::Event& iEvent, const edm::EventSetup&
             try
             {
                 pho_energy_scale[nPhotons] = pho.userFloat("energyScaleValue");
+                pho_energy_scale_up[nPhotons] = pho.userFloat("energyScaleUp");
+                pho_energy_scale_down[nPhotons] = pho.userFloat("energyScaleDown");
             }
             catch (...)
             {
                 std::cout << "No Photon scale found. Set it to 1." << std::endl;
                 pho_energy_scale[nPhotons] = 1.0;
+                pho_energy_scale_up[nPhotons] = 1.0;
+                pho_energy_scale_down[nPhotons] = 1.0;
             }
             try
             {
