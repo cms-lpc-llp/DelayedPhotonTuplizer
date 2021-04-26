@@ -5,25 +5,26 @@ then
     mkdir submit
 fi
 
-for Pt in \
-    20to40 \
-    40toInf \
-    20toInf \
-
+for HT in \
+    40To100 \
+    100To200 \
+    200To400 \
+    400To600 \
+    600ToInf 
 do
-                subfile=submit/GJet_Pt-${Pt}_DoubleEMEnriched.py
-                query_="dasgoclient --query=\"dataset=/GJet_Pt-${Pt}_DoubleEMEnriched*/RunIIAutumn18MiniAOD*/MINIAODSIM instance=prod/global\""
+                subfile=submit/GJets_HT_${HT}_TuneCP5_13TeV_madgraphMLM_pythia8.py
+                query_="dasgoclient --query=\"dataset=/GJets_HT-${HT}_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM instance=prod/global\""
                 inputDataset=`eval ${query_}`
-#                if [[ -z  $inputDataset  ]]; then
-#                    query_="dasgoclient --query=\"dataset=/GJet_HT${HT}*/RunIISummer16MiniAODv3*/MINIAODSIM instance=prod/global\""
-#                    inputDataset=`eval ${query_}`
-#                fi
+                if [[ -z  $inputDataset  ]]; then
+                    query_="dasgoclient --query=\"dataset=/GJets_HT-${HT}_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD*/MINIAODSIM instance=prod/global\""
+                    inputDataset=`eval ${query_}`
+                fi
                 echo ${inputDataset}
                 echo "from WMCore.Configuration import Configuration" > ${subfile}
                 echo "config = Configuration()" >> ${subfile}
                 echo "" >> ${subfile}
                 echo "config.section_(\"General\")" >> ${subfile}
-                echo "config.General.requestName = 'prodAutumn18_Run2DelayedPhotonNtupler_GJet_Pt${Pt}_DoubleEMEnriched_TuneCUETP8M1_13TeV_pythia8'" >> ${subfile} 
+                echo "config.General.requestName = 'prod_Run2DelayedPhotonNtupler_GJets_HT${HT}_TuneCP5_13TeV_madgraphMLM_pythia8'" >> ${subfile} 
                 echo "config.General.workArea = 'crab'" >> ${subfile} 
                 echo "" >> ${subfile} 
                 echo "config.section_(\"JobType\")" >> ${subfile} 
@@ -38,8 +39,6 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/GJet_DoubleEMEnriched_pho_corr/'" >> ${subfile} 
-                echo "Written to ${subfile}"
-                crab submit -c ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/GJets_pho_corr/'" >> ${subfile} 
+               crab submit -c ${subfile} 
 done
-
