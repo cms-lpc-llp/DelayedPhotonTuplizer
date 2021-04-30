@@ -788,6 +788,10 @@ protected:
   float gParticleDecayVertexY[GENPARTICLEARRAYSIZE];
   float gParticleDecayVertexZ[GENPARTICLEARRAYSIZE];
 
+  float gParticleProductionVertexX[GENPARTICLEARRAYSIZE];
+  float gParticleProductionVertexY[GENPARTICLEARRAYSIZE];
+  float gParticleProductionVertexZ[GENPARTICLEARRAYSIZE];
+
 
   //razor variables
   float HLTMR, HLTRSQ;

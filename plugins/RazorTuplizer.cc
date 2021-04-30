@@ -793,6 +793,9 @@ void RazorTuplizer::enableGenParticleBranches(){
   RazorEvents->Branch("gParticleDecayVertexX", gParticleDecayVertexX, "gParticleDecayVertexX[nGenParticle]/F");
   RazorEvents->Branch("gParticleDecayVertexY", gParticleDecayVertexY, "gParticleDecayVertexY[nGenParticle]/F");
   RazorEvents->Branch("gParticleDecayVertexZ", gParticleDecayVertexZ, "gParticleDecayVertexZ[nGenParticle]/F");
+  RazorEvents->Branch("gParticleProductionVertexX", gParticleProductionVertexX, "gParticleProductionVertexX[nGenParticle]/F");
+  RazorEvents->Branch("gParticleProductionVertexY", gParticleProductionVertexY, "gParticleProductionVertexY[nGenParticle]/F");
+  RazorEvents->Branch("gParticleProductionVertexZ", gParticleProductionVertexZ, "gParticleProductionVertexZ[nGenParticle]/F");
 
 }
 
@@ -1192,6 +1195,10 @@ void RazorTuplizer::resetBranches(){
             gParticleDecayVertexX[i] = -99999.0;
             gParticleDecayVertexY[i] = -99999.0;
             gParticleDecayVertexZ[i] = -99999.0;
+            gParticleProductionVertexX[i] = -99999.0;
+            gParticleProductionVertexY[i] = -99999.0;
+            gParticleProductionVertexZ[i] = -99999.0;
+
 
         }
     }
@@ -3082,7 +3089,7 @@ bool RazorTuplizer::fillGenParticles(){
     	   && ( (*prunedGenParticles)[i].status() < 30
 		)
 	   )
-       || (abs((*prunedGenParticles)[i].pdgId()) >= 32 && abs((*prunedGenParticles)[i].pdgId()) <= 42)
+       || (abs((*prunedGenParticles)[i].pdgId()) >= 58 && abs((*prunedGenParticles)[i].pdgId()) <= 61)
        || (abs((*prunedGenParticles)[i].pdgId()) >= 1000001 && abs((*prunedGenParticles)[i].pdgId()) <= 1000039)
        ){
       prunedV.push_back(&(*prunedGenParticles)[i]);
@@ -3106,11 +3113,14 @@ bool RazorTuplizer::fillGenParticles(){
     gParticlePhi[i] = prunedV[i]->phi();
     gParticleMotherId[i] = 0;
     gParticleMotherIndex[i] = -1;
+    gParticleProductionVertexX[i] = prunedV[i]->vx();
+    gParticleProductionVertexY[i] = prunedV[i]->vy();
+    gParticleProductionVertexZ[i] = prunedV[i]->vz();
 
     //For Neutralinos we try to find the decay vertex locaton.
     //Algorithm: Find the first daughter particle that is not a neutralino,
     //and call that the daughter. get the creation vertex of that daughter.
-    if (gParticleId[i] == 1000022 && gParticleStatus[i] == 22) {
+    if ((gParticleId[i] == 1000022 && gParticleStatus[i] == 22) || abs(gParticleId[i]) == 58) {
       const reco::Candidate *dau = 0;
       bool foundDaughter = false;
       bool noDaughter = false;
@@ -3119,7 +3129,7 @@ bool RazorTuplizer::fillGenParticles(){
       while (!foundDaughter && !noDaughter) {
 	if (tmpParticle->numberOfDaughters() > 0) {
 	  dau = tmpParticle->daughter(0);
-	  if (dau && dau->pdgId() != 1000022) {
+	  if (dau && dau->pdgId() != 1000022 && abs(dau->pdgId()) != 58) {
 	    foundDaughter = true;
 	  } else {
 	    tmpParticle = dau;
