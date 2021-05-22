@@ -576,7 +576,7 @@ void RazorTuplizer::enableEcalRechitBranches(){
   ecalRechit_GainSwitch1 = new std::vector<bool>; ecalRechit_GainSwitch1->clear();
   ecalRechit_GainSwitch6 = new std::vector<bool>; ecalRechit_GainSwitch6->clear();
   ecalRechit_transpCorr = new std::vector<float>; ecalRechit_transpCorr->clear();
-  if (isData_)
+  //if (isData_)
   {
       ecalRechit_pedrms12 = new std::vector<float>; ecalRechit_pedrms12->clear();
       ecalRechit_pedrms6 = new std::vector<float>; ecalRechit_pedrms6->clear();
@@ -594,7 +594,7 @@ void RazorTuplizer::enableEcalRechitBranches(){
   RazorEvents->Branch("ecalRechit_GainSwitch1", "std::vector<bool>",&ecalRechit_GainSwitch1);
   RazorEvents->Branch("ecalRechit_GainSwitch6", "std::vector<bool>",&ecalRechit_GainSwitch6);
   RazorEvents->Branch("ecalRechit_transpCorr", "std::vector<float>",&ecalRechit_transpCorr);
-  if (isData_)
+  //if (isData_)
   {
       RazorEvents->Branch("ecalRechit_pedrms12", "std::vector<float>",&ecalRechit_pedrms12);
       RazorEvents->Branch("ecalRechit_pedrms6", "std::vector<float>",&ecalRechit_pedrms6);
@@ -1168,7 +1168,7 @@ void RazorTuplizer::resetBranches(){
       ecalRechit_GainSwitch1->clear();
       ecalRechit_GainSwitch6->clear();
       ecalRechit_transpCorr->clear();
-      if (isData_)
+      //if (isData_)
       {
           ecalRechit_pedrms12->clear();
           ecalRechit_pedrms6->clear();
@@ -2517,7 +2517,7 @@ bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSe
         ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));	
 
         // pedestal info
-        if (isData_)
+        //if (isData_)
         {
             const auto &pediter = pedestalsH->find(recHitId);
             if (pediter != pedestalsH->end())
@@ -2584,7 +2584,7 @@ bool RazorTuplizer::fillEcalRechits(const edm::Event& iEvent, const edm::EventSe
         ecalRechit_GainSwitch6->push_back(recHit->checkFlag(EcalRecHit::kHasSwitchToGain6));
         ecalRechit_transpCorr->push_back(laser_->getLaserCorrection(recHitId, iEvent.eventAuxiliary().time()));
 
-        if (isData_)
+        //if (isData_)
         {
             // pedestal info
             const auto &pediter = pedestalsH->find(recHitId);
