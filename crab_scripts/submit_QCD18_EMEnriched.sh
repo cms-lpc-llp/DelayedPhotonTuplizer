@@ -39,7 +39,7 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/QCD_EMEnriched_pho_corr/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/QCD_EMEnriched/'" >> ${subfile} 
                 echo "Written to ${subfile}"
                 crab submit -c ${subfile} 
 done

@@ -12,8 +12,9 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
      #'/store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/RECOSIMstep_94X_mc2017_realistic_v10_ext1-v1/00000/02350E8C-32F4-E711-89CB-02163E0145CA.root'
-     '/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
+     #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/044F95FB-A342-E811-907F-5065F3816251.root'
      #'/store/mc/RunIIFall17MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_PSWeights/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/50000/9447AB9D-0C44-E811-B07A-0025905C9742.root'
+     '/store/mc/RunIIFall17MiniAODv2/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/029BAF9D-6845-E811-896F-001C23C102B9.root'
     )
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
@@ -33,7 +34,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #------ Declare the correct global tag ------#
 
 #Global Tag for Run2015D
-process.GlobalTag.globaltag = '94X_mc2017_realistic_v14'
+process.GlobalTag.globaltag = '102X_mc2017_realistic_v8'
 
 #------ If we add any inputs beyond standard miniAOD event content, import them here ------#
 

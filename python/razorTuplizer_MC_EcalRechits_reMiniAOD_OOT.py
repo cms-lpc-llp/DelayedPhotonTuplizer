@@ -23,7 +23,7 @@ process.source = cms.Source("PoolSource",
 	'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/GMSB_L-250TeV_Ctau-200cm_13TeV-pythia8/MINIAODSIM/PUMoriond17_80XLegacy_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/EC19C203-08C4-E811-9207-141877639F59.root'
 )
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #TFileService for output 

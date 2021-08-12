@@ -1,8 +1,8 @@
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 
-for lambda in 100 150 200 250 300 350 400
+for lambda in 100 #150 200 250 300 350 400
 do
-        for ctau in 0_01 0_1 1 50 100 1200 10000
+        for ctau in 800 # 50 100 1200 10000
         do
                 inputDataset=`dasgoclient --query="dataset=/GMSB_L${lambda}TeV*Ctau${ctau}cm_13TeV-pythia8/*CMSSW_9_3_6*22Apr2019*/* instance=prod/phys03"`
                 if [[ -z "${inputDataset}" ]]; then
@@ -27,12 +27,13 @@ do
                     echo "config.section_(\"Data\")" >> ${subfile} 
                     echo "config.Data.publication = False" >> ${subfile} 
                     echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                    echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
+                    echo "config.Data.splitting = 'FileBased'" >> ${subfile} 
+                    echo "config.Data.unitsPerJob = 50" >> ${subfile} 
                     echo "" >> ${subfile} 
                     echo "config.section_(\"Site\")" >> ${subfile} 
-                    echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
+                    echo "config.Site.storageSite = 'T2_US_Caltech_Ceph'" >> ${subfile} 
                     echo "config.Data.inputDBS = 'phys03'" >> ${subfile} 
-                    echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2016/MC2016PrivateGMSB/'" >> ${subfile} 
+                    echo "config.Data.outLFNDirBase = '/store/group/phys_llp/Run2DelayedPhotonNtuple/2016/MC2016PrivateGMSB/'" >> ${subfile} 
                     crab submit -c ${subfile}
                 fi  
         done

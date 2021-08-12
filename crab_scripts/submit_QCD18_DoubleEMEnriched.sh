@@ -7,7 +7,8 @@ fi
 
 for PT in \
     40toInf \
-    30toInf
+    30toInf \
+    #30to40
 do
                 subfile=submit/QCD_Pt${PT}_DoubleEMEnriched_TuneCP5_13TeV_pythia8.py
                 query_="dasgoclient --query=\"dataset=/QCD_Pt-${PT}*DoubleEMEnriched*/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v*/MINIAODSIM instance=prod/global\""
@@ -33,7 +34,7 @@ do
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
                 echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/QCD_DoubleEMEnriched_pho_corr/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2018/QCD_DoubleEMEnriched/'" >> ${subfile} 
                 echo "Written to ${subfile}"
                 crab submit -c ${subfile} 
 done

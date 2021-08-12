@@ -45,7 +45,7 @@ do
         for era in D
         do
                 subfile=submit/${PS}_Run2018${era}.py
-                query_="dasgoclient --query=\"dataset=/${PS}/Run2018${era}-PromptReco-v2/MINIAOD instance=prod/global\""
+                query_="dasgoclient --query=\"dataset=/${PS}/Run2018${era}-22Jan2019-v2/MINIAOD instance=prod/global\""
                 inputDataset=`eval ${query_}`
                 echo ${inputDataset}
                 echo "from WMCore.Configuration import Configuration" > ${subfile}

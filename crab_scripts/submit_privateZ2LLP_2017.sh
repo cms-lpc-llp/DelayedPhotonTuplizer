@@ -21,12 +21,13 @@ do
                 echo "config.section_(\"Data\")" >> ${subfile} 
                 echo "config.Data.publication = False" >> ${subfile} 
                 echo "config.Data.inputDataset = '${inputDataset}'" >> ${subfile} 
-                echo "config.Data.splitting = 'Automatic'" >> ${subfile} 
+                echo "config.Data.splitting = 'FileBased'" >> ${subfile} 
+                echo "config.Data.unitsPerJob = 10" >> ${subfile}
                 echo "" >> ${subfile} 
                 echo "config.section_(\"Site\")" >> ${subfile} 
-                echo "config.Site.storageSite = 'T2_US_Caltech'" >> ${subfile} 
+                echo "config.Site.storageSite = 'T2_US_Caltech_Ceph'" >> ${subfile} 
                 echo "config.Data.inputDBS = 'phys03'" >> ${subfile} 
-                echo "config.Data.outLFNDirBase = '/store/group/phys_susy/razor/run2/Run2DelayedPhotonNtuple/MC2017/MC2017PrivateZpToSSTo4Photon/'" >> ${subfile} 
+                echo "config.Data.outLFNDirBase = '/store/group/phys_llp/Run2DelayedPhotonNtuple/2017/MC2017PrivateZpToSSTo4Photon/'" >> ${subfile} 
                 crab submit -c ${subfile} 
         done
 done
